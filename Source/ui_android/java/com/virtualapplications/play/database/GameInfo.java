@@ -203,7 +203,7 @@ public class GameInfo {
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {
 						dialog.dismiss();
-						MainActivity.launchGame(gameFile);
+						MainActivity.launchDisk(gameFile, mContext);
 						return;
 					}
 				});

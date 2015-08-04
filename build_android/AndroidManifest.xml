@@ -28,7 +28,7 @@
 		android:banner="@drawable/ic_banner"
 		android:logo="@drawable/ic_logo"
 		android:isGame="true"
-		android:theme="@style/Blue"
+		android:theme="@style/AppTheme"
 		>
 		<activity 
 			android:name=".MainActivity"
@@ -41,6 +41,26 @@
 				<category android:name="android.intent.category.LEANBACK_LAUNCHER" />
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
+		</activity>
+		<activity
+			android:name=".EmulatorActivity"
+			android:configChanges="orientation|locale|keyboard|keyboardHidden|navigation"
+			android:screenOrientation="sensorLandscape"
+			android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+		</activity>
+		<activity
+			android:name=".SettingsActivity"
+			android:configChanges="orientation|locale|keyboard|keyboardHidden|navigation"
+			>
+		</activity>
+		<provider
+			android:name=".database.TheGamesDB"
+			android:authorities="virtualapplications.play.gamesdb" />
+		<activity
+            android:name=".ExternalEmulatorLauncher"
+            android:enabled="true"
+            android:exported="true"
+            android:label="@string/external_launcher">
 			<intent-filter>
 				<action android:name="android.intent.action.VIEW" />
 				
@@ -73,20 +93,6 @@
 					android:pathPattern=".*\\.elf"
 					android:scheme="file" />
 			</intent-filter>
-		</activity>
-		<activity
-			android:name=".EmulatorActivity"
-			android:configChanges="orientation|locale|keyboard|keyboardHidden|navigation"
-			android:screenOrientation="sensorLandscape"
-			android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
-		</activity>
-		<activity
-			android:name=".SettingsActivity"
-			android:configChanges="orientation|locale|keyboard|keyboardHidden|navigation"
-			>
-		</activity>
-		<provider
-			android:name=".database.TheGamesDB"
-			android:authorities="virtualapplications.play.gamesdb" />
+        </activity>
 	</application>
 </manifest> 

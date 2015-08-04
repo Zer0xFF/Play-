@@ -84,7 +84,7 @@ public class SettingsActivity extends PreferenceActivity
 				button_f.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 					@Override
 					public boolean onPreferenceClick(Preference arg0) {
-						MainActivity.resetDirectory();
+						All_Games_Fragment.resetDirectory();
 						getPreferenceScreen().removePreference(button_f);
 						return true;
 					}
