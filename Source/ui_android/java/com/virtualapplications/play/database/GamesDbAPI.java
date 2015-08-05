@@ -52,7 +52,6 @@ import com.virtualapplications.play.database.SqliteHelper.Games;
 public class GamesDbAPI extends AsyncTask<File, Integer, Document> {
 
 	private int index;
-	private View childview;
 	private Context mContext;
 	private String gameID;
 	private File gameFile;
@@ -69,9 +68,7 @@ public class GamesDbAPI extends AsyncTask<File, Integer, Document> {
 		this.gameID = gameID;
 	}
 	
-	public void setView(View childview) {
-		this.childview = childview;
-	}
+
 
 	protected void onPreExecute() {
 		gameInfo = new GameInfo(mContext);
@@ -150,13 +147,10 @@ public class GamesDbAPI extends AsyncTask<File, Integer, Document> {
 								String boxart = c.getString(c.getColumnIndex(Games.KEY_BOXART));
 								if (overview != null && boxart != null &&
 									!overview.equals("") && !boxart.equals("")) {
-									if (childview != null) {
-										childview.findViewById(R.id.childview).setOnLongClickListener(
-											gameInfo.configureLongClick(title, overview, gameFile));
 										if (boxart != null) {
-											gameInfo.getImage(dataID, childview, boxart);
+											gameInfo.getImage(dataID, boxart);
 										}
-									}
+
 									break;
 								}
 							} while (c.moveToNext());
@@ -165,7 +159,6 @@ public class GamesDbAPI extends AsyncTask<File, Integer, Document> {
 					c.close();
 					if (dataID == null) {
 						GamesDbAPI gameDatabase = new GamesDbAPI(mContext, remoteID);
-						gameDatabase.setView(childview);
 						gameDatabase.execute(gameFile);
 					}
 				} else {
@@ -203,13 +196,6 @@ public class GamesDbAPI extends AsyncTask<File, Integer, Document> {
 					}
 					c.close();
 
-					if (childview != null) {
-						childview.findViewById(R.id.childview).setOnLongClickListener(
-							gameInfo.configureLongClick(getValue(root, "GameTitle"), overview, gameFile));
-						if (coverImage != null) {
-							gameInfo.getImage(remoteID, childview, coverImage);
-						}
-					}
 				}
 			} catch (Exception e) {
 				
@@ -273,6 +259,10 @@ public class GamesDbAPI extends AsyncTask<File, Integer, Document> {
 			}
 		}
 		return "";
+	}
+
+	public String[] getit(){
+		return gameInfo.getGameInfo(gameFile);
 	}
 
 }

@@ -21,6 +21,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -62,7 +63,6 @@ public class All_Games_Fragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-    private TableLayout gameListing;
     private static boolean isConfigured = false;
     private int numColumn = 0;
     private float localScale;
@@ -191,8 +191,10 @@ public class All_Games_Fragment extends Fragment {
 
         private int array;
         private ProgressDialog progDialog;
+        private Activity mContext;
 
-        public ImageFinder(int arrayType) {
+        public ImageFinder(int arrayType, Activity context) {
+            this.mContext = context;
             this.array = arrayType;
         }
 
@@ -212,6 +214,8 @@ public class All_Games_Fragment extends Fragment {
                         } else if (StringUtils.endsWithIgnoreCase(name, "." + type)) {
                             File disk = new File(dir, name);
                             String serial = gameInfo.getSerial(disk);
+                            //if(MainActivity.IsLoadableExecutableFileName(disk.getPath()))
+                                //setCurrentDirectory(dir.getAbsolutePath());
                             return MainActivity.IsLoadableExecutableFileName(disk.getPath()) ||
                                     (serial != null && !serial.equals(""));
                         } else {
@@ -227,7 +231,7 @@ public class All_Games_Fragment extends Fragment {
             return (List<File>) files;
         }
 
-        private View createListItem(final File game, final int index) {
+        private View createListkItem(final File game, final int index) {
 
             if (!isConfigured) {
 
@@ -254,14 +258,14 @@ public class All_Games_Fragment extends Fragment {
 
             ((TextView) childview.findViewById(R.id.game_text)).setText(game.getName());
 
-            final String[] gameStats = gameInfo.getGameInfo(game, childview);
+            final String[] gameStats = gameInfo.getGameInfo(game);
 
             if (gameStats != null) {
                 childview.findViewById(R.id.childview).setOnLongClickListener(
                         gameInfo.configureLongClick(gameStats[1], gameStats[2], game));
 
                 if (!gameStats[3].equals("404")) {
-                    gameInfo.getImage(gameStats[0], childview, gameStats[3]);
+                    gameInfo.getImage(gameStats[0], gameStats[3]);
                     ((TextView) childview.findViewById(R.id.game_text)).setVisibility(View.GONE);
                 }
             }
@@ -314,51 +318,17 @@ public class All_Games_Fragment extends Fragment {
 
                 Collections.sort(images);
 
-                TableRow game_row = new TableRow(getActivity());
-                if (isConfigured) {
-                    game_row.setGravity(Gravity.CENTER);
-                }
-                int pad = (int) (10 * localScale + 0.5f);
-                game_row.setPadding(0, 0, 0, pad);
 
                 if (!isConfigured) {
-                    TableRow.LayoutParams params = new TableRow.LayoutParams(
-                            TableRow.LayoutParams.MATCH_PARENT,
-                            TableRow.LayoutParams.WRAP_CONTENT);
-                    params.gravity = Gravity.CENTER_VERTICAL;
-
-                    for (int i = 0; i < images.size(); i++)
-                    {
-                        game_row.addView(createListItem(images.get(i), i));
-                        gameListing.addView(game_row, params);
-                        game_row = new TableRow(getActivity());
-                        game_row.setPadding(0, 0, 0, pad);
-                    }
+                    CoverAdapter CV = new CoverAdapter(mContext, images);
+                    GridView gv = (GridView) mContext.findViewById(R.id.gridview);
+                    //gv.setColumnWidth(300);
+                    gv.setAdapter(CV);
                 } else {
-                    TableRow.LayoutParams params = new TableRow.LayoutParams(
-                            TableRow.LayoutParams.WRAP_CONTENT,
-                            TableRow.LayoutParams.WRAP_CONTENT);
-                    params.gravity = Gravity.CENTER;
-
-                    int column = 0;
-                    for (int i = 0; i < images.size(); i++)
-                    {
-                        if (column == numColumn)
-                        {
-                            gameListing.addView(game_row, params);
-                            column = 0;
-                            game_row = new TableRow(getActivity());
-                            game_row.setGravity(Gravity.CENTER);
-                            game_row.setPadding(0, 0, 0, pad);
-                        }
-                        game_row.addView(createListItem(images.get(i), i));
-                        column ++;
-                    }
-                    if (column != 0) {
-                        gameListing.addView(game_row, params);
-                    }
+                    CoverAdapter CV = new CoverAdapter(mContext, images);
+                    GridView gv = (GridView) mContext.findViewById(R.id.gridview);
+                    gv.setAdapter(CV);
                 }
-                gameListing.invalidate();
             } else {
                 // Display warning that no disks exist
             }
@@ -387,10 +357,6 @@ public class All_Games_Fragment extends Fragment {
             gameInfo = new GameInfo(this.getActivity());
         }
 
-        gameListing = (TableLayout) getActivity().findViewById(R.id.game_grid);
-        if (gameListing != null) {
-            gameListing.removeAllViews();
-        }
 
         DisplayMetrics metrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -413,7 +379,7 @@ public class All_Games_Fragment extends Fragment {
             isConfigured = true;
         }
 
-        new ImageFinder(R.array.disks).execute(sdcard);
+        new ImageFinder(R.array.disks, getActivity()).execute(sdcard);
 
 		/*if (!mDrawerLayout.isDrawerOpen(Gravity.LEFT)) {
 			if (!isConfigured) {

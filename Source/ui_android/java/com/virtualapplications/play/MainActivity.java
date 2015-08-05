@@ -58,11 +58,7 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
 		//Log.w(Constants.TAG, "MainActivity - onCreate");
 		
 		currentOrientation = getResources().getConfiguration().orientation;
-		if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-		} else {
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
-		}
+
 
 		setContentView(R.layout.main);
 
@@ -177,12 +173,13 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
 				navigation_drawer.getPaddingRight(), 
 				navigation_drawer.getPaddingBottom() + p.y);
 
-		View game_scroller = findViewById(R.id.game_grid);
+		/*View game_scroller = findViewById(R.id.game_grid);
 			game_scroller.setPadding(
 			game_scroller.getPaddingLeft(), 
 			game_scroller.getPaddingTop(), 
 			game_scroller.getPaddingRight(), 
 			game_scroller.getPaddingBottom() + p.y);
+		*/
 		}
 	}
 

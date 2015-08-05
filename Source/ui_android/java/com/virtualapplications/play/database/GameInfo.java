@@ -64,7 +64,7 @@ public class GameInfo {
 		
 	}
 	
-	public Bitmap getImage(String key, View childview, String boxart) {
+	public Bitmap getImage(String key, String boxart) {
 		String path = mContext.getExternalFilesDir(null) + "/covers/";
 		
 		File file = new File(path, key + ".jpg");
@@ -73,35 +73,25 @@ public class GameInfo {
 			BitmapFactory.Options options = new BitmapFactory.Options();
 			options.inPreferredConfig = Bitmap.Config.ARGB_8888;
 			Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
-			if (childview != null) {
-				ImageView preview = (ImageView) childview.findViewById(R.id.game_icon);
-				preview.setImageBitmap(bitmap);
-				preview.setScaleType(ScaleType.CENTER_INSIDE);
-				((TextView) childview.findViewById(R.id.game_text)).setVisibility(View.GONE);
-			}
 			return bitmap;
 		} else {
-			new GameImage(childview, boxart).execute(key);
+			new GameImage(boxart).execute(key);
 			return null;
 		}
 	}
 	
 	public class GameImage extends AsyncTask<String, Integer, Bitmap> {
 		
-		private View childview;
 		private String key;
 		private ImageView preview;
 		private String boxart;
 		
-		public GameImage(View childview, String boxart) {
-			this.childview = childview;
+		public GameImage( String boxart) {
 			this.boxart = boxart;
 		}
 		
 		protected void onPreExecute() {
-			if (childview != null) {
-				preview = (ImageView) childview.findViewById(R.id.game_icon);
-			}
+
 		}
 		
 		private int calculateInSampleSize(BitmapFactory.Options options) {
@@ -179,7 +169,6 @@ public class GameInfo {
 				if (preview != null) {
 					preview.setImageBitmap(image);
 					preview.setScaleType(ScaleType.CENTER_INSIDE);
-					((TextView) childview.findViewById(R.id.game_text)).setVisibility(View.GONE);
 				}
 			}
 		}
@@ -213,18 +202,17 @@ public class GameInfo {
 		};
 	}
 	
-	public String[] getGameInfo(File game, View childview) {
+	public String[] getGameInfo(File game) {
 		String serial = getSerial(game);
 		if (serial == null) {
-			getImage(game.getName(), childview, null);
+			getImage(game.getName(), null);
 			return null;
 		}
 		String suffix = serial.substring(5, serial.length());
 		String gameID = null,  title = null, overview = null, boxart = null;
 		ContentResolver cr = mContext.getContentResolver();
-		String selection = Games.KEY_SERIAL + "=? OR " + Games.KEY_SERIAL + "=? OR " + Games.KEY_SERIAL + "=? OR "
-							+ Games.KEY_SERIAL + "=? OR " + Games.KEY_SERIAL + "=? OR " + Games.KEY_SERIAL + "=?";
-		String[] selectionArgs = { serial, "SLUS" + suffix, "SLES" + suffix, "SLPS" + suffix, "SLPM" + suffix, "SCES" + suffix };
+		String selection = SqliteHelper.Games.KEY_SERIAL + " like ?";
+		String[] selectionArgs = { serial};
 		Cursor c = cr.query(Games.GAMES_URI, null, selection, selectionArgs, null);
 		if (c != null && c.getCount() > 0) {
 			if (c.moveToFirst()) {
@@ -243,9 +231,8 @@ public class GameInfo {
 		if (overview != null && boxart != null &&
 			!overview.equals("") && !boxart.equals("")) {
 			return new String[] { gameID, title, overview, boxart };
-		} else {
+		}  else {
 			GamesDbAPI gameDatabase = new GamesDbAPI(mContext, gameID);
-			gameDatabase.setView(childview);
 			gameDatabase.execute(game);
 			return null;
 		}
