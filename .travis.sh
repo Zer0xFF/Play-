@@ -4,10 +4,11 @@ travis_before_install()
 {
     cd ..
     if [ "$TARGET_OS" = "Linux" ]; then
-        sudo add-apt-repository --yes ppa:beineri/opt-qt562-trusty;
-        sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test;
-        sudo apt-get update -qq;
-        sudo apt-get install -qq qt56base gcc-5 g++-5 cmake libalut-dev;
+        sudo add-apt-repository --yes ppa:beineri/opt-qt562-trusty
+        sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
+        sudo add-apt-repository --yes ppa:george-edison55/precise-backports
+        sudo apt-get update -qq
+        sudo apt-get install -qq qt56base gcc-5 g++-5 cmake cmake-data libalut-dev
     elif [ "$TARGET_OS" = "OSX" ]; then
         sudo npm install -g appdmg
     elif [ "$TARGET_OS" = "IOS" ]; then
