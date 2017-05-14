@@ -6,7 +6,7 @@ travis_before_install()
     if [ "$TARGET_OS" = "Linux" ]; then
         sudo add-apt-repository --yes ppa:beineri/opt-qt562-trusty
         sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
-        sudo add-apt-repository --yes ppa:george-edison55/precise-backports
+        sudo add-apt-repository --yes ppa:george-edison55/cmake-3.x
         sudo apt-get update -qq
         sudo apt-get install -qq qt56base gcc-5 g++-5 cmake cmake-data libalut-dev
     elif [ "$TARGET_OS" = "OSX" ]; then
