@@ -22,13 +22,13 @@ build_script:
     
     cd Play
     
-    git clone -q https://github.com/jpd002/Play-Build.git Play-Build
+    git clone -q https://github.com/Thunder07/Play-Build.git Play-Build
     
     cd Play-Build
     
-    git submodule update -q --init --recursive
+    git checkout travis_test
     
-    git submodule foreach -q "git checkout -q master"
+    git submodule update -q --init --recursive
     
     cd Dependencies
     
@@ -46,7 +46,7 @@ build_script:
     
     cd build
     
-    cmake .. -G"%BUILD_TYPE%" -T v141_xp
+    cmake .. -G"%BUILD_TYPE%" -T v141_xp -DBUILD_PSFPLAYER=ON
     
     cmake --build . --config %CONFIG_TYPE%
     

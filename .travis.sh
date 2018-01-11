@@ -29,10 +29,10 @@ travis_before_install()
         ./install-cmake.sh
     fi;
 
-    git clone -q https://github.com/jpd002/Play-Build.git Play-Build
+    git clone -q https://github.com/Thunder07/Play-Build.git Play-Build
     pushd Play-Build
+    git checkout travis_test
     git submodule update -q --init --recursive
-    git submodule foreach "git checkout -q master"
     cd Dependencies
     git submodule update --init
     cd ..
@@ -56,10 +56,10 @@ travis_script()
             if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
             export PATH=/opt/cmake-3.8.1-Linux-x86_64/bin/:$PATH
             source /opt/qt56/bin/qt56-env.sh || true
-            cmake .. -G"$BUILD_TYPE" -DCMAKE_PREFIX_PATH=/opt/qt56/;
+            cmake .. -G"$BUILD_TYPE" -DCMAKE_PREFIX_PATH=/opt/qt56/ -DBUILD_PSFPLAYER=ON;
             cmake --build .
         elif [ "$TARGET_OS" = "OSX" ]; then
-            cmake .. -G"$BUILD_TYPE"
+            cmake .. -G"$BUILD_TYPE"  -DBUILD_PSFPLAYER=ON
             cmake --build . --config Release
             appdmg ../installer_macosx/spec.json Play.dmg
         elif [ "$TARGET_OS" = "IOS" ]; then
