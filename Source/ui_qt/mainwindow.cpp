@@ -152,7 +152,10 @@ void MainWindow::InitVirtualMachine()
 	{
 		m_virtualMachine->CreatePadHandler(CPH_GenericInput::GetFactoryFunction());
 		auto padHandler = static_cast<CPH_GenericInput*>(m_virtualMachine->GetPadHandler());
+		auto profile = CAppConfig::GetInstance().GetPreferenceString(PREF_UI_GAMEPAD1_PROFILE);
+
 		auto& bindingManager = padHandler->GetBindingManager();
+		bindingManager.Load(profile);
 
 		//Create QtKeyInputProvider
 		m_qtKeyInputProvider = std::make_shared<CInputProviderQtKey>();
@@ -583,6 +586,8 @@ void MainWindow::RegisterPreferences()
 {
 	CAppConfig::GetInstance().RegisterPreferenceBoolean(PREFERENCE_AUDIO_ENABLEOUTPUT, true);
 	CAppConfig::GetInstance().RegisterPreferenceBoolean(PREF_UI_PAUSEWHENFOCUSLOST, true);
+	CAppConfig::GetInstance().RegisterPreferenceString(PREF_UI_GAMEPAD1_PROFILE, "default");
+
 }
 
 void MainWindow::focusOutEvent(QFocusEvent* event)

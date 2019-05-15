@@ -7,9 +7,15 @@
 #include <QAbstractButton>
 #include <QPushButton>
 
+#include "AppConfig.h"
+#include "PreferenceDefs.h"
+#include "PathUtils.h"
 #include "bindingmodel.h"
 #include "ControllerInfo.h"
 #include "inputeventselectiondialog.h"
+
+#include <boost/filesystem.hpp>
+#include <iostream>
 
 ControllerConfigDialog::ControllerConfigDialog(CInputBindingManager* inputBindingManager, CInputProviderQtKey* qtKeyInputProvider, QWidget* parent)
     : QDialog(parent)
@@ -18,7 +24,24 @@ ControllerConfigDialog::ControllerConfigDialog(CInputBindingManager* inputBindin
     , m_qtKeyInputProvider(qtKeyInputProvider)
 {
 	ui->setupUi(this);
+	std::string profile = CAppConfig::GetInstance().GetPreferenceString(PREF_UI_GAMEPAD1_PROFILE);
+
 	PrepareBindingsView();
+
+	auto path = CGamePadConfig::GetProfilePath();
+	if(boost::filesystem::is_directory(path))
+	{
+		for(auto& entry : boost::filesystem::directory_iterator(path))
+		{
+			auto profile = Framework::PathUtils::GetNativeStringFromPath(entry.path().stem());
+			ui->comboBox->addItem(profile.c_str());
+		}
+	}
+
+	auto index = ui->comboBox->findText(profile.c_str());
+	if(index >= 0)
+		ui->comboBox->setCurrentIndex(index);
+
 }
 
 ControllerConfigDialog::~ControllerConfigDialog()
@@ -43,10 +66,12 @@ void ControllerConfigDialog::on_buttonBox_clicked(QAbstractButton* button)
 	if(button == ui->buttonBox->button(QDialogButtonBox::Ok))
 	{
 		m_inputManager->Save();
+		CAppConfig::GetInstance().Save();
 	}
 	else if(button == ui->buttonBox->button(QDialogButtonBox::Apply))
 	{
 		m_inputManager->Save();
+		CAppConfig::GetInstance().Save();
 	}
 	else if(button == ui->buttonBox->button(QDialogButtonBox::RestoreDefaults))
 	{
@@ -60,7 +85,7 @@ void ControllerConfigDialog::on_buttonBox_clicked(QAbstractButton* button)
 	}
 	else if(button == ui->buttonBox->button(QDialogButtonBox::Cancel))
 	{
-		m_inputManager->Load();
+		m_inputManager->Reload();
 	}
 }
 
@@ -123,4 +148,18 @@ int ControllerConfigDialog::OpenBindConfigDialog(int index)
 	IESD.Setup(button.c_str(), m_inputManager, m_qtKeyInputProvider, static_cast<PS2::CControllerInfo::BUTTON>(index));
 	auto res = IESD.exec();
 	return res;
+}
+
+void ControllerConfigDialog::on_comboBox_currentIndexChanged(int index)
+{
+	auto profile = ui->comboBox->itemText(index).toStdString();
+	std::cout << profile.c_str() << std::endl;
+	m_inputManager->Load(profile.c_str());
+	CAppConfig::GetInstance().SetPreferenceString(PREF_UI_GAMEPAD1_PROFILE, profile.c_str());
+	if(index == 0)
+	{
+		AutoConfigureKeyboard(m_inputManager);
+	}
+
+	static_cast<CBindingModel*>(ui->tableView->model())->Refresh();
 }

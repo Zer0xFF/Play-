@@ -27,6 +27,8 @@ private slots:
 	void on_tableView_doubleClicked(const QModelIndex& index);
 	void on_ConfigAllButton_clicked();
 
+	void on_comboBox_currentIndexChanged(int index);
+
 private:
 	void PrepareBindingsView();
 	int OpenBindConfigDialog(int index);
