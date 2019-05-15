@@ -215,6 +215,8 @@ set(COMMON_SRC_FILES
 	FpUtils.h
 	FrameDump.cpp
 	FrameDump.h
+	GamePadConfig.cpp
+	GamePadConfig.h
 	GenericMipsExecutor.h
 	gs/GsCachedArea.cpp
 	gs/GsCachedArea.h
