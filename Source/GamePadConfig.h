@@ -3,6 +3,8 @@
 #include "Config.h"
 #include "Singleton.h"
 
+#define DEFAULT_PROFILE ("default")
+
 class CGamePadConfig : public Framework::CConfig
 {
 public:
@@ -12,4 +14,5 @@ public:
 	void SetConfigPath(CConfig::PathType path);
 	static CConfig::PathType GetDefaultProfilePath();
 	static CConfig::PathType GetProfilePath();
+	static CConfig::PathType GetProfile(std::string = DEFAULT_PROFILE);
 };

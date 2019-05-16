@@ -3,7 +3,6 @@
 #include "PathUtils.h"
 
 #define PROFILE_PATH (L"Profiles")
-#define DEFAULT_PROFILE (L"default.xml")
 
 
 CGamePadConfig::CGamePadConfig()
@@ -13,7 +12,7 @@ CGamePadConfig::CGamePadConfig()
 
 Framework::CConfig::PathType CGamePadConfig::GetDefaultProfilePath()
 {
-	auto path = GetProfilePath() / DEFAULT_PROFILE;
+	auto path = GetProfile();
 	return path;
 }
 
@@ -21,6 +20,15 @@ Framework::CConfig::PathType CGamePadConfig::GetProfilePath()
 {
 	auto profile_path = CAppConfig::GetBasePath() / PROFILE_PATH;
 	Framework::PathUtils::EnsurePathExists(profile_path);
+	return profile_path;
+}
+
+Framework::CConfig::PathType CGamePadConfig::GetProfile(std::string name)
+{
+	auto profile_path = CAppConfig::GetBasePath() / PROFILE_PATH;
+	Framework::PathUtils::EnsurePathExists(profile_path);
+	profile_path /= name;
+	profile_path.replace_extension(".xml");
 	return profile_path;
 }
 
