@@ -28,6 +28,8 @@ private slots:
 	void on_ConfigAllButton_clicked();
 
 	void on_comboBox_currentIndexChanged(int index);
+	void on_addProfileButton_clicked();
+	void on_delProfileButton_clicked();
 
 private:
 	void PrepareBindingsView();

@@ -94,14 +94,14 @@ QGroupBox::title {
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="addProfileButton">
         <property name="text">
          <string>Add</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_2">
+       <widget class="QPushButton" name="delProfileButton">
         <property name="text">
          <string>Remove</string>
         </property>
