@@ -8,11 +8,10 @@
 class CGamePadConfig : public Framework::CConfig
 {
 public:
-	CGamePadConfig();
+	CGamePadConfig(const Framework::CConfig::PathType& path);
 	virtual ~CGamePadConfig() = default;
 
-	void SetConfigPath(CConfig::PathType path);
-	static CConfig::PathType GetDefaultProfilePath();
 	static CConfig::PathType GetProfilePath();
 	static CConfig::PathType GetProfile(std::string = DEFAULT_PROFILE);
+	static std::unique_ptr<CGamePadConfig> LoadProfile(std::string = DEFAULT_PROFILE);
 };

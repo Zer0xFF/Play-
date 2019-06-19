@@ -152,6 +152,6 @@ private:
 	static uint32 m_buttonDefaultValue[PS2::CControllerInfo::MAX_BUTTONS];
 	static const char* m_padPreferenceName[MAX_PADS];
 
-	CGamePadConfig m_config;
+	std::unique_ptr<CGamePadConfig> m_config;
 	ProviderMap m_providers;
 };

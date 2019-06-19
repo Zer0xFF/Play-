@@ -2,18 +2,18 @@
 #include "GamePadConfig.h"
 #include "PathUtils.h"
 
-#define PROFILE_PATH (L"Profiles")
+#define PROFILE_PATH (L"profiles")
 
-
-CGamePadConfig::CGamePadConfig()
-	: CConfig(GetDefaultProfilePath())
+CGamePadConfig::CGamePadConfig(const Framework::CConfig::PathType& path)
+	: CConfig(path)
 {
 }
 
-Framework::CConfig::PathType CGamePadConfig::GetDefaultProfilePath()
+std::unique_ptr<CGamePadConfig> CGamePadConfig::LoadProfile(std::string name)
 {
-	auto path = GetProfile();
-	return path;
+	auto path = GetProfilePath() / name;
+	path.replace_extension(".xml");
+	return std::make_unique<CGamePadConfig>(path);
 }
 
 Framework::CConfig::PathType CGamePadConfig::GetProfilePath()
@@ -30,12 +30,4 @@ Framework::CConfig::PathType CGamePadConfig::GetProfile(std::string name)
 	profile_path /= name;
 	profile_path.replace_extension(".xml");
 	return profile_path;
-}
-
-void CGamePadConfig::SetConfigPath(CConfig::PathType name)
-{
-	m_path = GetProfilePath() / name;
-	m_path.replace_extension(".xml");
-	m_preferences.clear();
-	Load();
 }
