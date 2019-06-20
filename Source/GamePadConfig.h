@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Config.h"
-#include "Singleton.h"
 
 #define DEFAULT_PROFILE ("default")
 

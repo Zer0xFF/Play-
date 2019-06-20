@@ -154,6 +154,8 @@ int ControllerConfigDialog::OpenBindConfigDialog(int index)
 
 void ControllerConfigDialog::on_comboBox_currentIndexChanged(int index)
 {
+	ui->delProfileButton->setEnabled(index > 0);
+
 	auto profile = ui->comboBox->itemText(index).toStdString();
 	std::cout << profile.c_str() << std::endl;
 	m_inputManager->Load(profile.c_str());
@@ -169,19 +171,17 @@ void ControllerConfigDialog::on_comboBox_currentIndexChanged(int index)
 void ControllerConfigDialog::on_addProfileButton_clicked()
 {
 	std::string profile_name;
-
 	while(profile_name.empty())
 	{
 		bool ok_pressed = false;
 		QString name = QInputDialog::getText(this, tr("Enter Profile Name"), tr("Only letters, numbers and dash characters allowed.\nProfile name:"),
 		QLineEdit::Normal, "", &ok_pressed);
 
-		// if cancel, stop there or empty entry
-		if(!ok_pressed || name.isEmpty())
+		if(!ok_pressed)
 			return;
 
-		// TODO filter text remove invalid path character
-		profile_name = name.toStdString();
+		if(!name.isEmpty() && boost::filesystem::portable_name(name.toStdString()))
+			profile_name = name.toStdString();
 	}
 
 	{
@@ -199,25 +199,14 @@ void ControllerConfigDialog::on_addProfileButton_clicked()
 
 void ControllerConfigDialog::on_delProfileButton_clicked()
 {
-
-	int index = ui->comboBox->currentIndex();
-	if(index == -1)
-		//TODO invalid selection
-		return;
-	
 	auto name = ui->comboBox->currentText();
-	if(name.isEmpty() || name == "default")
-	{
-		//TODO allow to delete default? it will be created again anyway
-		return;
-	}
-	
 	std::string profile_name = name.toStdString();
 	{
 		auto profile_path = CGamePadConfig::GetProfile(profile_name);
 		if(boost::filesystem::exists(profile_path))
 		{
 			boost::filesystem::remove(profile_path);
+			int index = ui->comboBox->currentIndex();
 			ui->comboBox->removeItem(index);
 		}
 	}
