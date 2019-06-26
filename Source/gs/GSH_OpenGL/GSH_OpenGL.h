@@ -235,7 +235,6 @@ private:
 		uint32 m_width;
 		uint32 m_height;
 		uint32 m_psm;
-		GLuint m_depthBuffer;
 		GLuint m_depthBufferImage;
 	};
 	typedef std::shared_ptr<CDepthbuffer> DepthbufferPtr;

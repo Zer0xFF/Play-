@@ -1040,9 +1040,6 @@ void CGSH_OpenGL::SetupFramebuffer(uint64 frameReg, uint64 zbufReg, uint64 sciss
 
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->m_framebuffer);
 
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthbuffer->m_depthBuffer);
-	CHECKGLERROR();
-
 	GLenum result = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	assert(result == GL_FRAMEBUFFER_COMPLETE);
 
@@ -1799,6 +1796,8 @@ void CGSH_OpenGL::DrawToDepth(unsigned int primitiveType, uint64 primReg)
 	//Must be a sprite
 	if(primitiveType != PRIM_SPRITE) return;
 
+	assert(false);
+#if 0
 	//Invalidate state
 	FlushVertexBuffer();
 	m_renderState.isValid = false;
@@ -1824,6 +1823,7 @@ void CGSH_OpenGL::DrawToDepth(unsigned int primitiveType, uint64 primReg)
 	glClear(GL_DEPTH_BUFFER_BIT);
 
 	m_validGlState &= ~GLSTATE_DEPTHMASK;
+#endif
 }
 
 void CGSH_OpenGL::CopyToFb(
@@ -2364,20 +2364,8 @@ CGSH_OpenGL::CDepthbuffer::CDepthbuffer(uint32 basePtr, uint32 width, uint32 hei
     , m_width(width)
     , m_height(height)
     , m_psm(psm)
-    , m_depthBuffer(0)
+    , m_depthBufferImage(0)
 {
-	//Build depth attachment
-	glGenRenderbuffers(1, &m_depthBuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, m_depthBuffer);
-	if(multisampled)
-	{
-		glRenderbufferStorageMultisample(GL_RENDERBUFFER, NUM_SAMPLES, GL_DEPTH_COMPONENT32F, m_width * scale, m_height * scale);
-	}
-	else
-	{
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32F, m_width * scale, m_height * scale);
-	}
-
 	glGenTextures(1, &m_depthBufferImage);
 	glBindTexture(GL_TEXTURE_2D, m_depthBufferImage);
 	glTexStorage2D(GL_TEXTURE_2D, 1, GL_R32UI, m_width * scale, m_height * scale);
@@ -2387,8 +2375,8 @@ CGSH_OpenGL::CDepthbuffer::CDepthbuffer(uint32 basePtr, uint32 width, uint32 hei
 
 CGSH_OpenGL::CDepthbuffer::~CDepthbuffer()
 {
-	if(m_depthBuffer != 0)
+	if(m_depthBufferImage != 0)
 	{
-		glDeleteRenderbuffers(1, &m_depthBuffer);
+		glDeleteTextures(1, &m_depthBufferImage);
 	}
 }
