@@ -629,6 +629,8 @@ void CGSH_OpenGL::SetRenderingContext(uint64 primReg)
 	auto shaderCaps = make_convertible<SHADERCAPS>(0);
 	FillShaderCapsFromTexture(shaderCaps, tex0Reg, tex1Reg, texAReg, clampReg);
 	FillShaderCapsFromTestAndZbuf(shaderCaps, testReg, zbufReg);
+	shaderCaps.hasAlphaBlend = prim.nAlpha;
+	FillShaderCapsFromAlpha(shaderCaps, alphaReg);
 
 	if(prim.nFog)
 	{
@@ -756,8 +758,13 @@ void CGSH_OpenGL::SetRenderingContext(uint64 primReg)
 
 void CGSH_OpenGL::SetupBlendingFunction(uint64 alphaReg)
 {
-	int nFunction = GL_FUNC_ADD;
 	auto alpha = make_convertible<ALPHA>(alphaReg);
+
+	m_fragmentParams.alphaFix = alpha.nFix;
+	m_validGlState &= ~GLSTATE_FRAGMENT_PARAMS;
+
+#if 0
+	int nFunction = GL_FUNC_ADD;
 
 	if((alpha.nA == alpha.nB) && (alpha.nD == ALPHABLEND_ABD_CS))
 	{
@@ -919,6 +926,7 @@ void CGSH_OpenGL::SetupBlendingFunction(uint64 alphaReg)
 	}
 
 	glBlendEquationSeparate(nFunction, GL_FUNC_ADD);
+#endif
 }
 
 void CGSH_OpenGL::SetupTestFunctions(uint64 testReg)
@@ -1010,6 +1018,9 @@ void CGSH_OpenGL::SetupFramebuffer(uint64 frameReg, uint64 zbufReg, uint64 sciss
 	m_renderState.colorMaskB = b;
 	m_renderState.colorMaskA = a;
 	m_validGlState &= ~GLSTATE_COLORMASK;
+
+	m_fragmentParams.colorMask = ~frame.nMask;
+	m_validGlState &= ~GLSTATE_FRAGMENT_PARAMS;
 
 	//Check if we're drawing into a buffer that's been used for depth before
 	{
@@ -1208,6 +1219,15 @@ void CGSH_OpenGL::FillShaderCapsFromTestAndZbuf(SHADERCAPS& shaderCaps, const ui
 		depthWriteEnabled = false;
 	}
 	shaderCaps.depthWriteEnabled = depthWriteEnabled;
+}
+
+void CGSH_OpenGL::FillShaderCapsFromAlpha(SHADERCAPS& shaderCaps, const uint64& alphaReg)
+{
+	auto alpha = make_convertible<ALPHA>(alphaReg);
+	shaderCaps.blendFactorA = alpha.nA;
+	shaderCaps.blendFactorB = alpha.nB;
+	shaderCaps.blendFactorC = alpha.nC;
+	shaderCaps.blendFactorD = alpha.nD;
 }
 
 void CGSH_OpenGL::SetupTexture(uint64 primReg, uint64 tex0Reg, uint64 tex1Reg, uint64 texAReg, uint64 clampReg)
@@ -1697,7 +1717,7 @@ void CGSH_OpenGL::DoRenderPass()
 
 	if((m_validGlState & GLSTATE_BLEND) == 0)
 	{
-		m_renderState.blendEnabled ? glEnable(GL_BLEND) : glDisable(GL_BLEND);
+		//m_renderState.blendEnabled ? glEnable(GL_BLEND) : glDisable(GL_BLEND);
 		m_validGlState |= GLSTATE_BLEND;
 	}
 
@@ -1709,15 +1729,15 @@ void CGSH_OpenGL::DoRenderPass()
 
 	if((m_validGlState & GLSTATE_COLORMASK) == 0)
 	{
-		glColorMask(
-		    m_renderState.colorMaskR, m_renderState.colorMaskG,
-		    m_renderState.colorMaskB, m_renderState.colorMaskA);
+		//glColorMask(
+		//    m_renderState.colorMaskR, m_renderState.colorMaskG,
+		//    m_renderState.colorMaskB, m_renderState.colorMaskA);
 		m_validGlState |= GLSTATE_COLORMASK;
 	}
 
 	if((m_validGlState & GLSTATE_DEPTHMASK) == 0)
 	{
-		glDepthMask(m_renderState.depthMask ? GL_TRUE : GL_FALSE);
+		//glDepthMask(m_renderState.depthMask ? GL_TRUE : GL_FALSE);
 		m_validGlState |= GLSTATE_DEPTHMASK;
 	}
 
@@ -1744,7 +1764,7 @@ void CGSH_OpenGL::DoRenderPass()
 	if((m_validGlState & GLSTATE_FRAMEBUFFER) == 0)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, m_renderState.framebufferHandle);
-		//glBindImageTexture(0, m_renderState.framebufferTextureHandle, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8);
+		glBindImageTexture(0, m_renderState.framebufferTextureHandle, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8);
 		glBindImageTexture(1, m_renderState.depthbufferTextureHandle, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
 		CHECKGLERROR();
 		m_validGlState |= GLSTATE_FRAMEBUFFER;
