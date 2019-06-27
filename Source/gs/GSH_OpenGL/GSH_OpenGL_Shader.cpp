@@ -415,18 +415,24 @@ Framework::OpenGl::CShader CGSH_OpenGL::GenerateFragmentShader(const SHADERCAPS&
 	//Update depth buffer
 	if(caps.depthWriteEnabled)
 	{
-		const char* writeCondition = "	if(!depthTestFail)";
+		const char* depthWriteCondition = "	if(!depthTestFail)";
 		if(caps.hasAlphaTest && (caps.alphaFailResult == ALPHA_TEST_FAIL_FBONLY))
 		{
-			writeCondition = "	if(!depthTestFail && !alphaTestFail)";
+			depthWriteCondition = "	if(!depthTestFail && !alphaTestFail)";
 		}
-		shaderBuilder << writeCondition << std::endl;
+		shaderBuilder << depthWriteCondition << std::endl;
 		shaderBuilder << "	{" << std::endl;
 		shaderBuilder << "		imageStore(g_depthbuffer, coords, uvec4(depth & g_depthMask));" << std::endl;
 		shaderBuilder << "	}" << std::endl;
 	}
 
-	shaderBuilder << "	if(!depthTestFail)" << std::endl;
+	const char* colorWriteCondition = "	if(!depthTestFail)";
+	if(caps.hasAlphaTest && (caps.alphaFailResult == ALPHA_TEST_FAIL_ZBONLY))
+	{
+		colorWriteCondition = "	if(!depthTestFail && !alphaTestFail)";
+	}
+
+	shaderBuilder << colorWriteCondition << std::endl;
 	shaderBuilder << "	{" << std::endl;
 
 	shaderBuilder << "		vec4 dstColor = imageLoad(g_framebuffer, coords);" << std::endl;
