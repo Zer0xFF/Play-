@@ -218,6 +218,7 @@ uint32 CSubSystem::ReadIoRegister(uint32 address)
 	else
 	{
 		CLog::GetInstance().Print(LOG_NAME, "Reading an unknown hardware register (0x%08X).\r\n", address);
+		return m_hw_map[address];
 	}
 	return 0;
 }
@@ -259,6 +260,7 @@ uint32 CSubSystem::WriteIoRegister(uint32 address, uint32 value)
 	else
 	{
 		CLog::GetInstance().Print(LOG_NAME, "Writing to an unknown hardware register (0x%08X, 0x%08X).\r\n", address, value);
+		m_hw_map[address] = value;
 	}
 
 	if(

@@ -1749,6 +1749,7 @@ void CPS2OS::sc_DisableDmac()
 }
 
 //18
+//1E
 void CPS2OS::sc_SetAlarm()
 {
 	uint32 delay = m_ee.m_State.nGPR[SC_PARAM0].nV[0];
@@ -3282,7 +3283,7 @@ CPS2OS::SystemCallHandler CPS2OS::m_sysCall[0x80] =
 	//0x10
 	&CPS2OS::sc_AddIntcHandler,		&CPS2OS::sc_RemoveIntcHandler,		&CPS2OS::sc_AddDmacHandler,			&CPS2OS::sc_RemoveDmacHandler,		&CPS2OS::sc_EnableIntc,			&CPS2OS::sc_DisableIntc,			&CPS2OS::sc_EnableDmac,			&CPS2OS::sc_DisableDmac,
 	//0x18
-	&CPS2OS::sc_SetAlarm,			&CPS2OS::sc_Unhandled,				&CPS2OS::sc_EnableIntc,				&CPS2OS::sc_DisableIntc,			&CPS2OS::sc_EnableDmac,			&CPS2OS::sc_DisableDmac,			&CPS2OS::sc_Unhandled,			&CPS2OS::sc_ReleaseAlarm,
+	&CPS2OS::sc_SetAlarm,			&CPS2OS::sc_Unhandled,				&CPS2OS::sc_EnableIntc,				&CPS2OS::sc_DisableIntc,			&CPS2OS::sc_EnableDmac,			&CPS2OS::sc_DisableDmac,			&CPS2OS::sc_SetAlarm,			&CPS2OS::sc_ReleaseAlarm,
 	//0x20
 	&CPS2OS::sc_CreateThread,		&CPS2OS::sc_DeleteThread,			&CPS2OS::sc_StartThread,			&CPS2OS::sc_ExitThread,				&CPS2OS::sc_ExitDeleteThread,	&CPS2OS::sc_TerminateThread,		&CPS2OS::sc_Unhandled,			&CPS2OS::sc_Unhandled,
 	//0x28

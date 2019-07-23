@@ -403,6 +403,7 @@ uint32 CGIF::ReceiveDMA(uint32 address, uint32 qwc, uint32 unused, bool tagInclu
 	{
 		memory = m_ram;
 	}
+	// fprintf(stderr, "address = 0x%x\tqwc = %d\tunused = %d\ttagIncluded = %d\t\n", address, qwc, unused, tagIncluded);
 
 	uint32 start = address;
 	uint32 end = address + size;
@@ -412,8 +413,23 @@ uint32 CGIF::ReceiveDMA(uint32 address, uint32 qwc, uint32 unused, bool tagInclu
 		assert(qwc >= 0);
 		address += 0x10;
 	}
-
-	address += ProcessMultiplePackets(memory, address, end, CGsPacketMetadata(3));
+	if((!m_path3Masked && m_queue.empty()) || true)
+	{
+		address += ProcessMultiplePackets(memory, address, end, CGsPacketMetadata(3));
+	}
+	else
+	{
+		if(m_queue.size() < 15)
+		{
+			auto queue = [&]
+			{
+				ProcessMultiplePackets(memory, address, end, CGsPacketMetadata(3));
+			};
+			m_queue.push(queue);
+			return qwc;
+		}
+		return 0;
+	}
 	assert(address <= end);
 
 	return (address - start) / 0x10;
@@ -425,12 +441,16 @@ uint32 CGIF::GetRegister(uint32 address)
 	switch(address)
 	{
 	case GIF_STAT:
-		if(m_path3Masked)
-		{
-			result |= GIF_STAT_M3P;
+			result |= m_path3Masked_MODE;
+			result |= m_path3Masked << 1;
+
+			result |= (!m_queue.empty() && m_activePath != 3) << 6;
+	
+			result |= (m_activePath != 0) << 9;
+			result |= m_activePath << 10;
+			result |= (m_queue.size() << 24);
 			//Indicate that FIFO is full (15 qwords) (needed for GTA: San Andreas)
-			result |= (0x1F << 24);
-		}
+			result |= (0xF << 24);
 		break;
 	}
 #ifdef _DEBUG
@@ -441,6 +461,13 @@ uint32 CGIF::GetRegister(uint32 address)
 
 void CGIF::SetRegister(uint32 address, uint32 value)
 {
+
+	switch(address)
+	{
+	case GIF_MODE:
+		m_path3Masked_MODE = value & 0x1;
+		break;
+	}
 #ifdef _DEBUG
 	DisassembleSet(address, value);
 #endif
@@ -454,6 +481,17 @@ CGSHandler* CGIF::GetGsHandler()
 void CGIF::SetPath3Masked(bool masked)
 {
 	m_path3Masked = masked;
+	if(!m_path3Masked || !m_path3Masked_MODE)
+	{
+		if((m_signalState + m_activePath + m_queue.size())!= 0)
+			fprintf(stderr, "m_signalState: %d\tm_activePath: %d\tm_queue.size(): %d\n", m_signalState, m_activePath, m_queue.size());
+		while(!m_queue.empty())
+		{
+			auto queue = std::move(m_queue.front());
+			queue();
+			m_queue.pop();
+		}
+	}
 }
 
 void CGIF::DisassembleGet(uint32 address)
@@ -464,7 +502,7 @@ void CGIF::DisassembleGet(uint32 address)
 		CLog::GetInstance().Print(LOG_NAME, "= GIF_STAT.\r\n", address);
 		break;
 	default:
-		CLog::GetInstance().Warn(LOG_NAME, "Reading unknown register 0x%08X.\r\n", address);
+		fprintf(stderr, "Reading unknown register 0x%08X.\r\n", address);
 		break;
 	}
 }
@@ -474,7 +512,7 @@ void CGIF::DisassembleSet(uint32 address, uint32 value)
 	switch(address)
 	{
 	default:
-		CLog::GetInstance().Warn(LOG_NAME, "Writing unknown register 0x%08X, 0x%08X.\r\n", address, value);
+		fprintf(stderr, "Writing unknown register 0x%08X, 0x%08X.\r\n", address, value);
 		break;
 	}
 }

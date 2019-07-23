@@ -11,37 +11,37 @@
 
 CLog::CLog()
 {
-#ifndef DISABLE_LOGGING
+// #ifndef DISABLE_LOGGING
 	m_logBasePath = CAppConfig::GetBasePath() / LOG_PATH;
 	Framework::PathUtils::EnsurePathExists(m_logBasePath);
 	CAppConfig::GetInstance().RegisterPreferenceBoolean(PREF_LOG_SHOWPRINTS, false);
 	m_showPrints = CAppConfig::GetInstance().GetPreferenceBoolean(PREF_LOG_SHOWPRINTS);
-#endif
+// #endif
 }
 
 void CLog::Print(const char* logName, const char* format, ...)
 {
-#if defined(_DEBUG) && !defined(DISABLE_LOGGING)
-	if(!m_showPrints) return;
+// #if defined(_DEBUG) && !defined(DISABLE_LOGGING)
+	// if(!m_showPrints) return;
 	auto& logStream(GetLog(logName));
 	va_list args;
 	va_start(args, format);
 	vfprintf(logStream, format, args);
 	va_end(args);
 	logStream.Flush();
-#endif
+// #endif
 }
 
 void CLog::Warn(const char* logName, const char* format, ...)
 {
-#if defined(_DEBUG) && !defined(DISABLE_LOGGING)
+// #if defined(_DEBUG) && !defined(DISABLE_LOGGING)
 	auto& logStream(GetLog(logName));
 	va_list args;
 	va_start(args, format);
 	vfprintf(logStream, format, args);
 	va_end(args);
 	logStream.Flush();
-#endif
+// #endif
 }
 
 Framework::CStdStream& CLog::GetLog(const char* logName)

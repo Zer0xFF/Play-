@@ -14,6 +14,8 @@
 #include "zip/ZipArchiveWriter.h"
 #include "zip/ZipArchiveReader.h"
 
+#include <map>
+
 namespace Iop
 {
 	class CSubSystem
@@ -66,5 +68,6 @@ namespace Iop
 		void CheckPendingInterrupts();
 
 		int m_dmaUpdateTicks;
+		std::map<int, uint32> m_hw_map;
 	};
 }

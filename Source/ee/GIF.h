@@ -5,13 +5,15 @@
 #include "zip/ZipArchiveReader.h"
 #include "../gs/GSHandler.h"
 #include "../Profiler.h"
+#include <queue>
 
 class CGIF
 {
 public:
 	enum REGISTER
 	{
-		GIF_STAT = 0x10003020
+		GIF_MODE = 0x10003010,
+		GIF_STAT = 0x10003020,
 	};
 
 	enum
@@ -75,6 +77,7 @@ private:
 	void DisassembleSet(uint32, uint32);
 
 	bool m_path3Masked = false;
+	bool m_path3Masked_MODE = false;
 	uint32 m_activePath = 0;
 
 	uint16 m_loops = 0;
@@ -90,4 +93,7 @@ private:
 	CGSHandler*& m_gs;
 
 	CProfiler::ZoneHandle m_gifProfilerZone = 0;
+
+	typedef std::function<void()> Task;
+	std::queue<Task> m_queue;
 };
