@@ -130,6 +130,8 @@ void CMemoryMap::SetByte(uint32 nAddress, uint8 nValue)
 uint16 CMemoryMap_LSBF::GetHalf(uint32 nAddress)
 {
 	assert((nAddress & 0x01) == 0);
+	if(nAddress == 0x10000004)
+		return 0;
 	const auto e = GetMap(m_readMap, nAddress);
 	if(!e)
 	{

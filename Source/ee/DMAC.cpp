@@ -400,6 +400,15 @@ uint32 CDMAC::GetRegister(uint32 nAddress)
 		return 0;
 		break;
 
+	//D5_CHCR
+	case D5_CHCR + 0x0:
+		return m_D5_CHCR;
+		break;
+	case D5_CHCR + 0x4:
+	case D5_CHCR + 0x8:
+	case D5_CHCR + 0xC:
+
+		break;
 		//Channel 8
 		REGISTER_READ(D8_CHCR, m_D8.ReadCHCR())
 		REGISTER_READ(D8_MADR, m_D8.m_nMADR)

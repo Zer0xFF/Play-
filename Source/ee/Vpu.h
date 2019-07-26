@@ -39,7 +39,7 @@ public:
 	CVpu(unsigned int, const VPUINIT&, CGIF&, CINTC&, uint8*, uint8*);
 	virtual ~CVpu();
 
-	void Execute(int32);
+	int Execute(int32);
 	void Reset();
 	void SaveState(Framework::CZipArchiveWriter&);
 	void LoadState(Framework::CZipArchiveReader&);
@@ -52,7 +52,7 @@ public:
 
 	CVif& GetVif();
 
-	void ExecuteMicroProgram(uint32);
+	void ExecuteMicroProgram(uint32, int = 0);
 	void InvalidateMicroProgram();
 
 	void ProcessXgKick(uint32);

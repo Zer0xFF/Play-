@@ -74,6 +74,12 @@ void CVif::Reset()
 
 uint32 CVif::GetRegister(uint32 address)
 {
+	if(
+	    (address >= VIF0_FIFO_START && address < VIF0_FIFO_END) ||
+	    (address >= VIF1_FIFO_START && address < VIF1_FIFO_END))
+	{
+		return FifoRead(address);
+	}
 	uint32 result = 0;
 	switch(address)
 	{
@@ -303,6 +309,16 @@ void CVif::ProcessFifoWrite(uint32 address, uint32 value)
 		memmove(m_fifoBuffer, m_fifoBuffer + discardSize, newIndex);
 		m_fifoIndex = newIndex;
 	}
+}
+uint32 CVif::FifoRead(uint32 address)
+{
+	assert(m_fifoIndex != FIFO_SIZE);
+	if(m_fifoIndex == FIFO_SIZE)
+	{
+		return 0;
+	}
+	uint32 index = (address & 0xF) / 4;
+	return *reinterpret_cast<uint32*>(m_fifoBuffer + m_fifoIndex + index * 4);
 }
 
 void CVif::ProcessPacket(StreamType& stream)

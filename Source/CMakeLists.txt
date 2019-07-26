@@ -242,6 +242,8 @@ set(COMMON_SRC_FILES
 	iop/Iop_FileIoHandler2100.h
 	iop/Iop_FileIoHandler2240.cpp
 	iop/Iop_FileIoHandler2240.h
+	iop/Iop_HddLoad.cpp
+	iop/Iop_HddLoad.h
 	iop/Iop_Heaplib.cpp
 	iop/Iop_Heaplib.h
 	iop/Iop_Intc.cpp

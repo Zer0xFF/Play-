@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <cctype>
 #include "std_experimental_map.h"
+#include <boost/algorithm/string/replace.hpp>
 
 using namespace Iop;
 
@@ -168,7 +169,12 @@ Framework::CStream* CIoman::OpenInternal(uint32 flags, const char* path)
 	{
 		throw std::runtime_error("Device not found.");
 	}
-	auto stream = deviceIterator->second->GetFile(flags, pathInfo.devicePath.c_str());
+	auto filePath = pathInfo.devicePath;
+	if(pathInfo.deviceName == "host0")
+	{
+		boost::replace_all(filePath, "../", "");
+	}
+	auto stream = deviceIterator->second->GetFile(flags, filePath.c_str());
 	if(!stream)
 	{
 		throw std::runtime_error("File not found.");

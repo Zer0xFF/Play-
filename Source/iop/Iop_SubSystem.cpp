@@ -210,6 +210,12 @@ uint32 CSubSystem::ReadIoRegister(uint32 address)
 	{
 		return m_spu2.ReadRegister(address);
 	}
+	else if(address == 0x1F80146E)
+	{
+		// 0x32 = expansion bay
+		// 0x30 == CXD9611
+		return 0;
+	}
 	else if(address >= 0x1F808400 && address <= 0x1F808500)
 	{
 		//iLink (aka Firewire) stuff

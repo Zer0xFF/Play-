@@ -162,6 +162,8 @@ bool CCdvdfsv::Invoke592(uint32 method, uint32* args, uint32 argsSize, uint32* r
 		if(retSize != 0)
 		{
 			assert(retSize >= 0x10);
+			ret[1] = 1; // cdvdfsv Ver
+			ret[2] = 1; // cdvdman Ver
 			ret[0x03] = 0xFF;
 		}
 		CLog::GetInstance().Print(LOG_NAME, "Init(mode = %d);\r\n", mode);
@@ -211,6 +213,13 @@ bool CCdvdfsv::Invoke593(uint32 method, uint32* args, uint32 argsSize, uint32* r
 	}
 	break;
 
+	case 0x0A:
+		CLog::GetInstance().Print(LOG_NAME, "A(mode = 0x%x);\r\n", args[0x00]);
+		CLog::GetInstance().Warn(LOG_NAME, "Unknown method invoked (0x%08X, 0x%08X, argsSize = %d, retSize = %d).\r\n", 0x593, method, argsSize, retSize);
+
+		ret[0x00] = -1;
+		break;
+
 	case 0x0C:
 		//Status
 		assert(retSize >= 4);
@@ -245,9 +254,13 @@ bool CCdvdfsv::Invoke593(uint32 method, uint32* args, uint32 argsSize, uint32* r
 		ret[1] = (m_opticalMedia && m_opticalMedia->GetDvdIsDualLayer()) ? 1 : 0;
 	}
 	break;
-
+	case 0x43:
+	{
+		ret[0] = -1;
+		// break;
+	}
 	default:
-		CLog::GetInstance().Warn(LOG_NAME, "Unknown method invoked (0x%08X, 0x%08X).\r\n", 0x593, method);
+		CLog::GetInstance().Warn(LOG_NAME, "Unknown method invoked (0x%08X, 0x%08X, argsSize = %d, retSize = %d).\r\n", 0x593, method, argsSize, retSize);
 		break;
 	}
 	return true;
@@ -315,8 +328,10 @@ bool CCdvdfsv::Invoke596(uint32 method, uint32* args, uint32 argsSize, uint32* r
 {
 	switch(method)
 	{
+	case 0x1: //? init
+		break;
 	default:
-		CLog::GetInstance().Warn(LOG_NAME, "Unknown method invoked (0x%08X, 0x%08X).\r\n", 0x596, method);
+		CLog::GetInstance().Warn(LOG_NAME, "Unknown method invoked (0x%08X, 0x%08X, argsSize = %d, retSize = %d).\r\n", 0x596, method, argsSize, retSize);
 		break;
 	}
 	return true;

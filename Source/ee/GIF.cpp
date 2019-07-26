@@ -34,6 +34,7 @@ CGIF::CGIF(CGSHandler*& gs, uint8* ram, uint8* spr)
 void CGIF::Reset()
 {
 	m_path3Masked = false;
+	m_path3Masked_MODE = false;
 	m_activePath = 0;
 	m_loops = 0;
 	m_cmd = 0;
@@ -43,6 +44,7 @@ void CGIF::Reset()
 	m_eop = false;
 	m_qtemp = QTEMP_INIT;
 	m_signalState = SIGNAL_STATE_NONE;
+	std::queue<Task>().swap(m_queue);
 }
 
 void CGIF::LoadState(Framework::CZipArchiveReader& archive)
@@ -279,6 +281,15 @@ uint32 CGIF::ProcessSinglePacket(const uint8* memory, uint32 address, uint32 end
 #endif
 
 	assert((m_activePath == 0) || (m_activePath == packetMetadata.pathIndex));
+	if(m_activePath != packetMetadata.pathIndex && m_activePath != 0)
+	{
+		fprintf(stderr, "2 PATHS ACTIVE AT ONCE!!!! %d %d\n", m_activePath ,packetMetadata.pathIndex);
+		fprintf(stderr, "2 PATHS ACTIVE AT ONCE!!!! %d %d\n", m_activePath ,packetMetadata.pathIndex);
+		fprintf(stderr, "2 PATHS ACTIVE AT ONCE!!!! %d %d\n", m_activePath ,packetMetadata.pathIndex);
+		fprintf(stderr, "2 PATHS ACTIVE AT ONCE!!!! %d %d\n", m_activePath ,packetMetadata.pathIndex);
+		fprintf(stderr, "2 PATHS ACTIVE AT ONCE!!!! %d %d\n", m_activePath ,packetMetadata.pathIndex);
+		exit(-1);
+	}
 	m_signalState = SIGNAL_STATE_NONE;
 	writeList.clear();
 
@@ -389,7 +400,7 @@ uint32 CGIF::ProcessMultiplePackets(const uint8* memory, uint32 address, uint32 
 }
 
 uint32 CGIF::ReceiveDMA(uint32 address, uint32 qwc, uint32 unused, bool tagIncluded)
-{
+{ 
 	uint32 size = qwc * 0x10;
 
 	uint8* memory = nullptr;
@@ -413,17 +424,29 @@ uint32 CGIF::ReceiveDMA(uint32 address, uint32 qwc, uint32 unused, bool tagInclu
 		assert(qwc >= 0);
 		address += 0x10;
 	}
-	if((!m_path3Masked && m_queue.empty()) || true)
+	// fprintf(stderr, "%s::", __FUNCTION__);
+	if(CanProcessPATH3() && m_queue.empty())
 	{
+		if(!m_queue.empty())
+			fprintf(stderr, "RINGDADADINGDING!!!!\n");
 		address += ProcessMultiplePackets(memory, address, end, CGsPacketMetadata(3));
 	}
 	else
 	{
-		if(m_queue.size() < 15)
+		// auto state = m_path3Masked;
+		// if(m_activePath == 3 && !m_queue.empty())
+		// 	SetPath3Masked(false);
+		// m_path3Masked = state;
+		if(m_queue.size() < 16)
 		{
-			auto queue = [&]
+			std::vector<uint8> buffer(size + 0x10);
+			// memcpy(buffer.data(), &memory[start], size + 0x10);
+			fprintf(stderr, "IN memory = 0x%x, address = 0x%x, end = 0x%x\n", memory, address, end);
+			auto queue = [&, memory, address, end, tagIncluded]
 			{
+				fprintf(stderr, "OT memory = 0x%x, address = 0x%x, end = 0x%x ", memory, address, end);
 				ProcessMultiplePackets(memory, address, end, CGsPacketMetadata(3));
+				fprintf(stderr, "OUT\n");
 			};
 			m_queue.push(queue);
 			return qwc;
@@ -443,19 +466,19 @@ uint32 CGIF::GetRegister(uint32 address)
 	case GIF_STAT:
 			result |= m_path3Masked_MODE;
 			result |= m_path3Masked << 1;
+			result |= m_intermediate || !CanProcessPATH3() << 2;
 
-			result |= (!m_queue.empty() && m_activePath != 3) << 6;
+			result |= m_intermediate << 5;
+			result |= m_intermediate << 6;
 	
 			result |= (m_activePath != 0) << 9;
 			result |= m_activePath << 10;
 			result |= (m_queue.size() << 24);
 			//Indicate that FIFO is full (15 qwords) (needed for GTA: San Andreas)
-			result |= (0xF << 24);
+			result |= (0x1F << 24);
 		break;
 	}
-#ifdef _DEBUG
-	DisassembleGet(address);
-#endif
+	// DisassembleGet(address);
 	return result;
 }
 
@@ -466,11 +489,14 @@ void CGIF::SetRegister(uint32 address, uint32 value)
 	{
 	case GIF_MODE:
 		m_path3Masked_MODE = value & 0x1;
+		m_intermediate = value & 0x4;
+		if(m_intermediate)
+			m_activePath = 0;
 		break;
 	}
-#ifdef _DEBUG
-	DisassembleSet(address, value);
-#endif
+	// DisassembleSet(address, value);
+	// ProcessPATH3();
+	// SetPath3Masked(m_path3Masked);
 }
 
 CGSHandler* CGIF::GetGsHandler()
@@ -478,20 +504,55 @@ CGSHandler* CGIF::GetGsHandler()
 	return m_gs;
 }
 
+bool CGIF::CanProcessPATH3()
+{
+	bool res = false;
+	if((!m_path3Masked && !m_path3Masked_MODE))
+	{
+		res = true;
+	}
+	// fprintf(stderr, "%s() res = %d (!%d && !%d)\tm_activePath = %d\t queue = %d\n", __FUNCTION__, res, m_path3Masked, m_path3Masked_MODE, m_activePath, m_queue.size());
+	return res;
+}
+
 void CGIF::SetPath3Masked(bool masked)
 {
 	m_path3Masked = masked;
-	if(!m_path3Masked || !m_path3Masked_MODE)
+}
+
+void CGIF::ProcessPATH3(int cycle)
+{
+	// fprintf(stderr, "CYCLES: %d\n", cycle);
+	// fprintf(stderr, "%s::", __FUNCTION__);
+	if(CanProcessPATH3())
 	{
-		if((m_signalState + m_activePath + m_queue.size())!= 0)
-			fprintf(stderr, "m_signalState: %d\tm_activePath: %d\tm_queue.size(): %d\n", m_signalState, m_activePath, m_queue.size());
-		while(!m_queue.empty())
+		// if((m_signalState + m_activePath + m_queue.size())!= 0)
+			// fprintf(stderr, "m_signalState: %d\tm_activePath: %d\tm_queue.size(): %d\n", m_signalState, m_activePath, m_queue.size());
+		std::lock_guard<std::mutex> lock(m_path3_queue);
+		int i = 0;
+		if(!m_queue.empty() && i < 16 && cycle > 0)
 		{
 			auto queue = std::move(m_queue.front());
 			queue();
 			m_queue.pop();
+			i++;
+			cycle--;
 		}
 	}
+	// else if(m_activePath == 3)
+	// {
+	// 	std::lock_guard<std::mutex> lock(m_path3_queue);
+	// 	int i = 0;
+	// 	while(!m_queue.empty() && m_activePath == 3 && cycle > 0)
+	// 	{
+	// 		auto queue = std::move(m_queue.front());
+	// 		queue();
+	// 		m_queue.pop();
+	// 		i++;
+	// 		cycle--;
+	// 	}
+	// 	fprintf(stderr, "m_signalState: %d\tm_activePath: %d\tm_queue.size(): %d\n", m_signalState, m_activePath, m_queue.size());
+	// }
 }
 
 void CGIF::DisassembleGet(uint32 address)
@@ -499,7 +560,7 @@ void CGIF::DisassembleGet(uint32 address)
 	switch(address)
 	{
 	case GIF_STAT:
-		CLog::GetInstance().Print(LOG_NAME, "= GIF_STAT.\r\n", address);
+		fprintf(stderr, "= GIF_STAT.\r\n", address);
 		break;
 	default:
 		fprintf(stderr, "Reading unknown register 0x%08X.\r\n", address);

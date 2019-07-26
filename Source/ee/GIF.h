@@ -57,6 +57,9 @@ public:
 	CGSHandler* GetGsHandler();
 
 	void SetPath3Masked(bool);
+	bool CanProcessPATH3();
+	void ProcessPATH3(int);
+
 
 	void LoadState(Framework::CZipArchiveReader&);
 	void SaveState(Framework::CZipArchiveWriter&);
@@ -78,6 +81,7 @@ private:
 
 	bool m_path3Masked = false;
 	bool m_path3Masked_MODE = false;
+	bool m_intermediate = false;
 	uint32 m_activePath = 0;
 
 	uint16 m_loops = 0;
@@ -96,4 +100,5 @@ private:
 
 	typedef std::function<void()> Task;
 	std::queue<Task> m_queue;
+	std::mutex m_path3_queue;
 };

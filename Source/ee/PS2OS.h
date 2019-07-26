@@ -330,6 +330,7 @@ private:
 	void sc_SifSetDChain();
 	void sc_SifSetReg();
 	void sc_SifGetReg();
+	void sc_ExecOSD();
 	void sc_Deci2Call();
 	void sc_MachineType();
 	void sc_GetMemorySize();

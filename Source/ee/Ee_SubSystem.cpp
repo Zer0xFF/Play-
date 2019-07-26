@@ -240,6 +240,7 @@ int CSubSystem::ExecuteCpu(int quota)
 	{
 		executed = (quota - m_EE.m_executor->Execute(quota));
 	}
+	// printf("executed: %d \tquota: %d \tExecute(quota): %d \n", executed, quota, executed - quota);
 	if(m_EE.m_State.nHasException)
 	{
 		switch(m_EE.m_State.nHasException)
@@ -254,7 +255,7 @@ int CSubSystem::ExecuteCpu(int quota)
 				//We are in callMs mode
 				assert(!m_vpu0->IsVuRunning());
 				CopyVuState(m_VU0, m_EE);
-				m_vpu0->ExecuteMicroProgram(m_EE.m_State.callMsAddr);
+				m_vpu0->ExecuteMicroProgram(m_EE.m_State.callMsAddr, executed / 2);
 				m_EE.m_State.nHasException = MIPS_EXCEPTION_NONE;
 			}
 			break;
@@ -305,6 +306,7 @@ void CSubSystem::CountTicks(int ticks)
 	m_dmac.ResumeDMA8();
 	m_ipu.CountTicks(ticks);
 	ExecuteIpu();
+	m_gif.ProcessPATH3(ticks / 2);
 	if(!m_EE.m_State.nHasException)
 	{
 		if((m_EE.m_State.nCOP0[CCOP_SCU::STATUS] & CMIPS::STATUS_EXL) == 0)
@@ -421,6 +423,10 @@ uint32 CSubSystem::IOPortReadHandler(uint32 nAddress)
 		nReturn = m_vpu0->GetVif().GetRegister(nAddress);
 	}
 	else if(nAddress >= CVif::REGS1_START && nAddress < CVif::REGS1_END)
+	{
+		nReturn = m_vpu1->GetVif().GetRegister(nAddress);
+	}
+	else if(nAddress >= CVif::VIF1_FIFO_START && nAddress < CVif::VIF1_FIFO_END)
 	{
 		nReturn = m_vpu1->GetVif().GetRegister(nAddress);
 	}

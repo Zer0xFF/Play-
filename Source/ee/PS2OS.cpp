@@ -102,6 +102,7 @@
 #define SYSCALL_NAME_ENABLEDMAC "osEnableDmac"
 #define SYSCALL_NAME_DISABLEDMAC "osDisableDmac"
 #define SYSCALL_NAME_SETALARM "osSetAlarm"
+#define SYSCALL_NAME_ISETALARM "osiSetAlarm"
 #define SYSCALL_NAME_IENABLEINTC "osiEnableIntc"
 #define SYSCALL_NAME_IDISABLEINTC "osiDisableIntc"
 #define SYSCALL_NAME_IENABLEDMAC "osiEnableDmac"
@@ -149,6 +150,7 @@
 #define SYSCALL_NAME_SIFDMASTAT "osSifDmaStat"
 #define SYSCALL_NAME_SIFSETDMA "osSifSetDma"
 #define SYSCALL_NAME_SIFSETDCHAIN "osSifSetDChain"
+#define SYSCALL_NAME_EXECOSD "ExecOSD"
 #define SYSCALL_NAME_DECI2CALL "osDeci2Call"
 #define SYSCALL_NAME_MACHINETYPE "osMachineType"
 
@@ -174,6 +176,7 @@ const CPS2OS::SYSCALL_NAME CPS2OS::g_syscallNames[] =
         {0x001B, SYSCALL_NAME_IDISABLEINTC},
         {0x001C, SYSCALL_NAME_IENABLEDMAC},
         {0x001D, SYSCALL_NAME_IDISABLEDMAC},
+        {0x001E, SYSCALL_NAME_ISETALARM},
         {0x001F, SYSCALL_NAME_IRELEASEALARM},
         {0x0020, SYSCALL_NAME_CREATETHREAD},
         {0x0021, SYSCALL_NAME_DELETETHREAD},
@@ -217,6 +220,7 @@ const CPS2OS::SYSCALL_NAME CPS2OS::g_syscallNames[] =
         {0x0076, SYSCALL_NAME_SIFDMASTAT},
         {0x0077, SYSCALL_NAME_SIFSETDMA},
         {0x0078, SYSCALL_NAME_SIFSETDCHAIN},
+        {0x007C, SYSCALL_NAME_EXECOSD},
         {0x007C, SYSCALL_NAME_DECI2CALL},
         {0x007E, SYSCALL_NAME_MACHINETYPE},
         {0x0000, NULL}};
@@ -1773,6 +1777,7 @@ void CPS2OS::sc_SetAlarm()
 	m_ee.m_State.nGPR[SC_RETURN].nD0 = alarmId;
 }
 
+//19
 //1F
 void CPS2OS::sc_ReleaseAlarm()
 {
@@ -2526,9 +2531,11 @@ void CPS2OS::sc_WaitSema()
 {
 	uint32 id = m_ee.m_State.nGPR[SC_PARAM0].nV[0];
 
+	// fprintf(stderr, "%s(id = %d)\n", __FUNCTION__, id);
 	auto sema = m_semaphores[id];
 	if(sema == nullptr)
 	{
+		// fprintf(stderr, "%s(id = %d) ret : -1\n", __FUNCTION__, id);
 		m_ee.m_State.nGPR[SC_RETURN].nD0 = -1;
 		return;
 	}
@@ -2545,6 +2552,7 @@ void CPS2OS::sc_WaitSema()
 
 		UnlinkThread(m_currentThreadId);
 		ThreadShakeAndBake();
+		// fprintf(stderr, "%s(id = %d) ret : %d < %d : ++\n", __FUNCTION__, id, sema->count, sema->maxCount);
 
 		return;
 	}
@@ -2552,7 +2560,9 @@ void CPS2OS::sc_WaitSema()
 	if(sema->count != 0)
 	{
 		sema->count--;
+		// fprintf(stderr, "%s(id = %d) ret : %d : --\n", __FUNCTION__, id, sema->count);
 	}
+	// fprintf(stderr, "%s(id = %d) ret : count %d maxCount = %d : end \n", __FUNCTION__, id, sema->count, sema->maxCount);
 
 	m_ee.m_State.nGPR[SC_RETURN].nD0 = id;
 }
@@ -2793,6 +2803,24 @@ void CPS2OS::sc_SifGetReg()
 	m_ee.m_State.nGPR[SC_RETURN].nD0 = static_cast<int32>(m_sif.GetRegister(registerId));
 }
 
+//7B
+void CPS2OS::sc_ExecOSD()
+{
+	uint32 argCount = m_ee.m_State.nGPR[SC_PARAM0].nV[0];
+	uint32 argValuesPtr = m_ee.m_State.nGPR[SC_PARAM1].nV[0];
+
+	CLog::GetInstance().Warn(LOG_NAME, "stub function sc_ExecOSD(argCount = %d, argValuesPtr = %d):\r\n", argCount, argValuesPtr);
+
+	ArgumentList arguments;
+	for(uint32 i = 0; i < argCount; i++)
+	{
+		uint32 argValuePtr = *reinterpret_cast<uint32*>(GetStructPtr(argValuesPtr + i * 4));
+		arguments.push_back(reinterpret_cast<const char*>(GetStructPtr(argValuePtr)));
+		CLog::GetInstance().Warn(LOG_NAME, "agrv[%d] = %s\n", i,  reinterpret_cast<const char*>(GetStructPtr(argValuePtr)));
+
+	}
+}
+
 //7C
 void CPS2OS::sc_Deci2Call()
 {
@@ -2929,9 +2957,9 @@ void CPS2OS::HandleSyscall()
 
 		if(GetCustomSyscallTable()[func] == 0)
 		{
-#ifdef _DEBUG
+// #ifdef _DEBUG
 			DisassembleSysCall(static_cast<uint8>(func & 0xFF));
-#endif
+// #endif
 			if(func < 0x80)
 			{
 				((this)->*(m_sysCall[func & 0xFF]))();
@@ -2948,13 +2976,13 @@ void CPS2OS::HandleSyscall()
 
 void CPS2OS::DisassembleSysCall(uint8 func)
 {
-#ifdef _DEBUG
+// #ifdef _DEBUG
 	std::string description(GetSysCallDescription(func));
 	if(description.length() != 0)
 	{
 		CLog::GetInstance().Print(LOG_NAME, "%d: %s\r\n", m_currentThreadId.Get(), description.c_str());
 	}
-#endif
+// #endif
 }
 
 std::string CPS2OS::GetSysCallDescription(uint8 function)
@@ -3058,6 +3086,12 @@ std::string CPS2OS::GetSysCallDescription(uint8 function)
 	case 0x1D:
 		sprintf(description, SYSCALL_NAME_IDISABLEDMAC "(channel = %d);",
 		        m_ee.m_State.nGPR[SC_PARAM0].nV[0]);
+		break;
+		case 0x1E:
+		sprintf(description, SYSCALL_NAME_ISETALARM "(time = %d, proc = 0x%08X, arg = 0x%08X);",
+		        m_ee.m_State.nGPR[SC_PARAM0].nV[0],
+		        m_ee.m_State.nGPR[SC_PARAM1].nV[0],
+		        m_ee.m_State.nGPR[SC_PARAM2].nV[0]);
 		break;
 	case 0x1F:
 		sprintf(description, SYSCALL_NAME_IRELEASEALARM "(id = %d);",
@@ -3253,6 +3287,11 @@ std::string CPS2OS::GetSysCallDescription(uint8 function)
 		sprintf(description, "SifGetReg(register = 0x%08X);",
 		        m_ee.m_State.nGPR[SC_PARAM0].nV[0]);
 		break;
+	case 0x7B:
+		sprintf(description, SYSCALL_NAME_EXECOSD "(ptr = 0x%08X, ptr = 0x%08X);",
+		        m_ee.m_State.nGPR[SC_PARAM0].nV[0],
+		        m_ee.m_State.nGPR[SC_PARAM1].nV[0]);
+		break;
 	case 0x7C:
 		sprintf(description, SYSCALL_NAME_DECI2CALL "(func = 0x%08X, param = 0x%08X);",
 		        m_ee.m_State.nGPR[SC_PARAM0].nV[0],
@@ -3283,7 +3322,7 @@ CPS2OS::SystemCallHandler CPS2OS::m_sysCall[0x80] =
 	//0x10
 	&CPS2OS::sc_AddIntcHandler,		&CPS2OS::sc_RemoveIntcHandler,		&CPS2OS::sc_AddDmacHandler,			&CPS2OS::sc_RemoveDmacHandler,		&CPS2OS::sc_EnableIntc,			&CPS2OS::sc_DisableIntc,			&CPS2OS::sc_EnableDmac,			&CPS2OS::sc_DisableDmac,
 	//0x18
-	&CPS2OS::sc_SetAlarm,			&CPS2OS::sc_Unhandled,				&CPS2OS::sc_EnableIntc,				&CPS2OS::sc_DisableIntc,			&CPS2OS::sc_EnableDmac,			&CPS2OS::sc_DisableDmac,			&CPS2OS::sc_SetAlarm,			&CPS2OS::sc_ReleaseAlarm,
+	&CPS2OS::sc_SetAlarm,			&CPS2OS::sc_ReleaseAlarm,				&CPS2OS::sc_EnableIntc,				&CPS2OS::sc_DisableIntc,			&CPS2OS::sc_EnableDmac,			&CPS2OS::sc_DisableDmac,			&CPS2OS::sc_SetAlarm,			&CPS2OS::sc_ReleaseAlarm,
 	//0x20
 	&CPS2OS::sc_CreateThread,		&CPS2OS::sc_DeleteThread,			&CPS2OS::sc_StartThread,			&CPS2OS::sc_ExitThread,				&CPS2OS::sc_ExitDeleteThread,	&CPS2OS::sc_TerminateThread,		&CPS2OS::sc_Unhandled,			&CPS2OS::sc_Unhandled,
 	//0x28
@@ -3307,7 +3346,7 @@ CPS2OS::SystemCallHandler CPS2OS::m_sysCall[0x80] =
 	//0x70
 	&CPS2OS::sc_GsGetIMR,			&CPS2OS::sc_GsPutIMR,				&CPS2OS::sc_Unhandled,				&CPS2OS::sc_SetVSyncFlag,			&CPS2OS::sc_SetSyscall,			&CPS2OS::sc_Unhandled,				&CPS2OS::sc_SifDmaStat,			&CPS2OS::sc_SifSetDma,
 	//0x78
-	&CPS2OS::sc_SifSetDChain,		&CPS2OS::sc_SifSetReg,				&CPS2OS::sc_SifGetReg,				&CPS2OS::sc_Unhandled,				&CPS2OS::sc_Deci2Call,			&CPS2OS::sc_Unhandled,				&CPS2OS::sc_MachineType,		&CPS2OS::sc_GetMemorySize,
+	&CPS2OS::sc_SifSetDChain,		&CPS2OS::sc_SifSetReg,				&CPS2OS::sc_SifGetReg,				&CPS2OS::sc_ExecOSD,				&CPS2OS::sc_Deci2Call,			&CPS2OS::sc_Unhandled,				&CPS2OS::sc_MachineType,		&CPS2OS::sc_GetMemorySize,
 };
 // clang-format on
 

@@ -185,6 +185,7 @@ protected:
 	};
 
 	void ProcessFifoWrite(uint32, uint32);
+	uint32 FifoRead(uint32);
 
 	void ProcessPacket(StreamType&);
 	virtual void ExecuteCommand(StreamType&, CODE);

@@ -19,6 +19,7 @@
 #include "Iop_Modload.h"
 #include "Iop_Loadcore.h"
 #include "Iop_LibSd.h"
+#include "Iop_hddload.h"
 #ifdef _IOP_EMULATE_MODULES
 #include "Iop_FileIo.h"
 #include "Iop_PadMan.h"
@@ -622,6 +623,7 @@ private:
 	Iop::MtapManPtr m_mtapman;
 	Iop::ModulePtr m_mcserv;
 	Iop::CdvdfsvPtr m_cdvdfsv;
+	Iop::CHDDLoadPtr m_hddload;
 
 	std::map<std::string, Iop::ModulePtr> m_hleModules;
 #endif

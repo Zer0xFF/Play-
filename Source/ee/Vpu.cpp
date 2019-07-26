@@ -36,20 +36,21 @@ CVpu::~CVpu()
 #endif
 }
 
-void CVpu::Execute(int32 quota)
+int CVpu::Execute(int32 quota)
 {
-	if(!m_running) return;
+	if(!m_running) return 0;
 
 #ifdef PROFILE
 	CProfilerZone profilerZone(m_vuProfilerZone);
 #endif
 
-	m_ctx->m_executor->Execute(quota);
+	int cycles = m_ctx->m_executor->Execute(quota);
 	if(m_ctx->m_State.nHasException)
 	{
 		//E bit encountered
 		m_running = false;
 	}
+	return cycles;
 }
 
 #ifdef DEBUGGER_INCLUDED
@@ -137,9 +138,9 @@ CVif& CVpu::GetVif()
 	return *m_vif.get();
 }
 
-void CVpu::ExecuteMicroProgram(uint32 nAddress)
+void CVpu::ExecuteMicroProgram(uint32 nAddress, int quota)
 {
-	CLog::GetInstance().Print(LOG_NAME, "Starting microprogram execution at 0x%08X.\r\n", nAddress);
+	// CLog::GetInstance().Print(LOG_NAME, "Starting microprogram execution at 0x%08X.\r\n", nAddress);
 
 	m_ctx->m_State.nPC = nAddress;
 	m_ctx->m_State.pipeTime = 0;
@@ -150,12 +151,26 @@ void CVpu::ExecuteMicroProgram(uint32 nAddress)
 #endif
 
 	assert(!m_running);
-	m_running = true;
-	for(unsigned int i = 0; i < 100; i++)
+	int cycles = 0;
+	if(quota == 0)
 	{
-		Execute(5000);
-		if(!m_running) break;
+		m_running = true;
+		for(unsigned int i = 0; i < 1000; i++)
+		{
+			cycles += Execute(500);
+			if(!m_running)
+			{
+				break;
+			}
+		}
 	}
+	else
+	{
+		m_running = true;
+		cycles = Execute(quota);
+	}
+	// if(quota != 0)
+	// 	fprintf(stderr, "VPU Cycles: %5d / %5d\trunning:%d\n", cycles, quota, m_running);
 }
 
 void CVpu::InvalidateMicroProgram()

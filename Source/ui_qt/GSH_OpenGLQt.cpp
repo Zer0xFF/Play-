@@ -33,6 +33,11 @@ void CGSH_OpenGLQt::InitializeImpl()
 	Q_ASSERT(result == GLEW_OK);
 #endif
 
+	if(wglSwapIntervalEXT)
+	{
+		wglSwapIntervalEXT(0);
+	}
+
 	CGSH_OpenGL::InitializeImpl();
 }
 

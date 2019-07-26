@@ -215,6 +215,13 @@ void CCdvdman::Invoke(CMIPS& ctx, unsigned int functionId)
 		    ctx.m_State.nGPR[CMIPS::A0].nV0,
 		    ctx.m_State.nGPR[CMIPS::A1].nV0);
 		break;
+	case 22: //CdReadIlinkID(uint16 id[16], int * err)
+		ctx.m_State.nGPR[CMIPS::V0].nV0 = 1;
+		*reinterpret_cast<uint32*>(m_ram + ctx.m_State.nGPR[CMIPS::A0].nV0) = 0x41414141;
+		*reinterpret_cast<uint8*>(m_ram + ctx.m_State.nGPR[CMIPS::A1].nV0) = 0;
+		CLog::GetInstance().Warn(LOG_NAME, "CdReadIlinkID (%d).\r\n",
+		                         functionId);
+		break;
 	case 24:
 		ctx.m_State.nGPR[CMIPS::V0].nV0 = CdReadClock(ctx.m_State.nGPR[CMIPS::A0].nV0);
 		break;

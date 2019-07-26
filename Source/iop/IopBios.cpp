@@ -230,6 +230,10 @@ void CIopBios::Reset(const Iop::SifManPtr& sifMan)
 		m_cdvdfsv = std::make_shared<Iop::CCdvdfsv>(*m_sifMan, *m_cdvdman, m_ram);
 		RegisterModule(m_cdvdfsv);
 	}
+	// {
+	// 	m_hddload = std::make_shared<Iop::CHDDLoad>();
+	// 	RegisterModule(m_hddload);
+	// }
 	{
 		m_mcserv = std::make_shared<Iop::CMcServ>(*this, *m_sifMan, *m_sifCmd, *m_sysmem, m_ram);
 		RegisterModule(m_mcserv);
@@ -240,6 +244,7 @@ void CIopBios::Reset(const Iop::SifManPtr& sifMan)
 		m_mtapman = std::make_shared<Iop::CMtapMan>();
 	}
 
+	// m_hleModules.insert(std::make_pair("rom0:HDDLOAD", m_hddload));
 	m_hleModules.insert(std::make_pair("rom0:SIO2MAN", m_padman));
 	m_hleModules.insert(std::make_pair("rom0:PADMAN", m_padman));
 	m_hleModules.insert(std::make_pair("rom0:TSIO2MAN", m_padman));
