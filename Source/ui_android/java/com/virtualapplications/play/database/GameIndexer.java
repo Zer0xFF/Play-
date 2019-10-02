@@ -4,8 +4,10 @@ import android.os.Environment;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashSet;
 
 import static com.virtualapplications.play.BootablesInterop.fullScanBootables;
@@ -23,16 +25,11 @@ public class GameIndexer
 			final java.lang.Process process = new ProcessBuilder().command("mount")
 					.redirectErrorStream(true).start();
 			InputStream is = process.getInputStream();
-			byte[] buffer = new byte[1024];
-			while (is.read(buffer) != -1)
-			{
-				s.append(new String(buffer));
-			}
-			is.close();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 			process.waitFor();
 
-			String[] lines = s.toString().split("\n");
-			for (String line : lines)
+			String line;
+			while((line = reader.readLine()) != null)
 			{
 				if (StringUtils.containsIgnoreCase(line, "secure"))
 					continue;
@@ -49,6 +46,7 @@ public class GameIndexer
 					}
 				}
 			}
+			reader.close();
 		}
 		catch (final Exception e)
 		{
