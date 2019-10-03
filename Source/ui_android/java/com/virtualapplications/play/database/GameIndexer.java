@@ -26,7 +26,6 @@ public class GameIndexer
 					.redirectErrorStream(true).start();
 			InputStream is = process.getInputStream();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-			process.waitFor();
 
 			String line;
 			while((line = reader.readLine()) != null)
@@ -47,6 +46,7 @@ public class GameIndexer
 				}
 			}
 			reader.close();
+			process.waitFor();
 		}
 		catch (final Exception e)
 		{
