@@ -1,6 +1,15 @@
 @echo off
 setlocal enabledelayedexpansion
 
+cd deps
+cd Dependencies
+git remote add main https://github.com/Zer0xFF/Play-Dependencies.git
+git fetch main
+git pull main vs2019
+cd ..
+cd ..
+
+
 mkdir build
 cd build
 
