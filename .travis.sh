@@ -5,6 +5,12 @@ travis_before_install()
     if [ "$TARGET_OS" = "Linux" ]; then
         sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
         if [ "$TARGET_ARCH" = "ARM64" ]; then
+            wget -c "https://github.com/Zer0xFF/linuxdeployqt/releases/download/AArch64/linuxdeployqt-continuous-aarch64.AppImage"
+            chmod a+x linuxdeployqt*.AppImage
+            wget -c "https://github.com/Zer0xFF/AppImageKit-checkrt/releases/download/0.1/AppRun_patched_ARM64" -O AppRun
+            chmod a+x AppRun
+            wget -c "https://github.com/Zer0xFF/AppImageKit-checkrt/releases/download/0.1/exec_ARM64.so" -O exec.so
+
             sudo apt update -qq
             sudo apt install -y gcc-9 g++-9 qtbase5-dev libcurl4-openssl-dev libgl1-mesa-dev libglu1-mesa-dev libalut-dev libevdev-dev libgles2-mesa-dev
         else
@@ -17,8 +23,8 @@ travis_before_install()
             sudo add-apt-repository --yes ppa:beineri/opt-qt-5.12.3-xenial
             sudo apt update -qq
             sudo apt install -qq qt512base gcc-9 g++-9 libgl1-mesa-dev libglu1-mesa-dev libalut-dev libevdev-dev
-            apt download libc6
         fi
+        apt download libc6
     elif [ "$TARGET_OS" = "Linux_Clang_Format" ]; then
         wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
         sudo apt-add-repository --yes "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main"
@@ -74,26 +80,25 @@ travis_script()
             cmake --build .
             ctest
             cmake --build . --target install
-            if [ "$TARGET_ARCH" = "x86_64" ]; then
-                mkdir tmp; cd tmp
-                ar x ../../libc6*
-                cd ../appdir/
-                tar xf ../tmp/data.tar.xz
-                cd ..
-                rm -rf tmp;
 
-                mkdir -p appdir/usr/optional/
-                mkdir -p appdir/usr/optional/libstdc++/
-                cp /usr/lib/*-linux-gnu/libstdc++.so.6 ./appdir/usr/optional/libstdc++/
-                cp ../AppRun ./appdir/AppRun
-                cp ../exec.so ./appdir/usr/optional/exec.so
-                printf "#include <memory>\nint main(){std::make_exception_ptr(0);}" | $CXX -x c++ -o ./appdir/usr/optional/checker -
-                # AppImage Creation
-                unset QTDIR; unset QT_PLUGIN_PATH; unset LD_LIBRARY_PATH;
-                export VERSION="${TRAVIS_COMMIT:0:8}"
-                ../linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -bundle-non-qt-libs -unsupported-allow-new-glibc -qmake=`which qmake`
-                ../linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -appimage -unsupported-allow-new-glibc -qmake=`which qmake`
-            fi
+            mkdir tmp; cd tmp
+            ar x ../../libc6*
+            cd ../appdir/
+            tar xf ../tmp/data.tar.xz
+            cd ..
+            rm -rf tmp;
+
+            mkdir -p appdir/usr/optional/
+            mkdir -p appdir/usr/optional/libstdc++/
+            cp /usr/lib/*-linux-gnu/libstdc++.so.6 ./appdir/usr/optional/libstdc++/
+            cp ../AppRun ./appdir/AppRun
+            cp ../exec.so ./appdir/usr/optional/exec.so
+            printf "#include <memory>\nint main(){std::make_exception_ptr(0);}" | $CXX -x c++ -o ./appdir/usr/optional/checker -
+            # AppImage Creation
+            unset QTDIR; unset QT_PLUGIN_PATH; unset LD_LIBRARY_PATH;
+            export VERSION="${TRAVIS_COMMIT:0:8}"
+            ../linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -bundle-non-qt-libs -unsupported-allow-new-glibc -qmake=`which qmake` -no-translations
+            ../linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -appimage -unsupported-allow-new-glibc -qmake=`which qmake` -no-translations
         elif [ "$TARGET_OS" = "OSX" ]; then
             export CMAKE_PREFIX_PATH="$(brew --prefix qt5)"
             cmake .. -G"$BUILD_TYPE"
@@ -128,9 +133,7 @@ travis_before_deploy()
         return
     fi;
     if [ "$TARGET_OS" = "Linux" ]; then
-        if [ "$TARGET_ARCH" = "x86_64" ]; then
-            cp ../../build/Play*.AppImage .
-        fi;
+        cp ../../build/Play*.AppImage .
     fi;
     if [ "$TARGET_OS" = "Android" ]; then
         cp ../../build_android/build/outputs/apk/release/Play-release-unsigned.apk .
