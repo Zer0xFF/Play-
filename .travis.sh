@@ -95,6 +95,7 @@ travis_script()
             cp ../exec.so ./appdir/usr/optional/exec.so
             printf "#include <memory>\nint main(){std::make_exception_ptr(0);}" | $CXX -x c++ -o ./appdir/usr/optional/checker -
             # AppImage Creation
+            export QT_SELECT=qt5
             unset QTDIR; unset QT_PLUGIN_PATH; unset LD_LIBRARY_PATH;
             export VERSION="${TRAVIS_COMMIT:0:8}"
             ../linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -bundle-non-qt-libs -unsupported-allow-new-glibc -qmake=`which qmake` -no-translations
