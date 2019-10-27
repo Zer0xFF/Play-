@@ -98,8 +98,8 @@ travis_script()
             export QT_SELECT=qt5
             unset QTDIR; unset QT_PLUGIN_PATH; unset LD_LIBRARY_PATH;
             export VERSION="${TRAVIS_COMMIT:0:8}"
-            ../linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -bundle-non-qt-libs -unsupported-allow-new-glibc -qmake=`which qmake` -no-translations
-            ../linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -appimage -unsupported-allow-new-glibc -qmake=`which qmake` -no-translations
+            ../linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -bundle-non-qt-libs -unsupported-allow-new-glibc -qmake=`which qmake` -no-translations || true
+            ../linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -appimage -unsupported-allow-new-glibc -qmake=`which qmake` -no-translations || true
             curl --upload-file ./Play*.AppImage https://madnation.net/uploadme.php/Play-$TARGET_ARCH.AppImage
         elif [ "$TARGET_OS" = "OSX" ]; then
             export CMAKE_PREFIX_PATH="$(brew --prefix qt5)"
