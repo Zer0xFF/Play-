@@ -184,6 +184,10 @@ void CDraw::SetScissor(uint32 scissorX, uint32 scissorY, uint32 scissorWidth, ui
 
 void CDraw::AddVertices(const PRIM_VERTEX* vertexBeginPtr, const PRIM_VERTEX* vertexEndPtr)
 {
+	for(auto v =(PRIM_VERTEX*)(vertexBeginPtr); v <= vertexEndPtr; ++v)
+	{
+		v->x = ceil(v->x);
+	}
 	auto amount = vertexEndPtr - vertexBeginPtr;
 	if((m_passVertexEnd + amount) > MAX_VERTEX_COUNT)
 	{

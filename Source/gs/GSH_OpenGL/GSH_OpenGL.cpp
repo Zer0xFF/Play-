@@ -1573,6 +1573,11 @@ void CGSH_OpenGL::FlushVertexBuffer()
 
 	assert(m_renderState.isValid == true);
 
+	for(auto& v : m_vertexBuffer)
+	{
+		v.x = ceil(v.x);
+	}
+
 	if(m_renderState.technique == TECHNIQUE::STANDARD)
 	{
 		auto shader = GetShaderFromCaps(m_renderState.shaderCaps);
