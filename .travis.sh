@@ -9,14 +9,9 @@ travis_before_install()
         if [ "$TARGET_ARCH" = "ARM64" ]; then
             sudo apt update -qq
             sudo apt install -y gcc-9 g++-9 qtbase5-dev libqt5x11extras5-dev libcurl4-openssl-dev libgl1-mesa-dev libglu1-mesa-dev libalut-dev libevdev-dev libgles2-mesa-dev
-            wget https://github.com/Kitware/CMake/releases/download/v3.17.1/cmake-3.17.1.tar.gz
-            tar -xvf cmake-3.17.1.tar.gz > /dev/null
-            cd cmake-3.17.1
-            cmake .
-            make -j8
-            cpack -C "Release" -G "STGZ"
-            curl --upload-file cmake-3.17*.sh https://madnation.net/transfer.php/cmake/installer.sh
-            sudo make install
+            wget https://madnation.net/uploads/cmake/1bb78-installer.sh
+            chmod 755 1bb78-installer.sh
+            sudo sh 1bb78-installer.sh --skip-license
             cd ..
         else
             wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
