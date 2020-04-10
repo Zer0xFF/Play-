@@ -7,7 +7,7 @@ travis_before_install()
         sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
         sudo apt-add-repository --yes 'deb https://apt.kitware.com/ubuntu/ xenial main'
         if [ "$TARGET_ARCH" = "ARM64" ]; then
-            sudo apt update -qq
+            sudo apt update
             sudo apt install -y gcc-9 g++-9 qtbase5-dev libqt5x11extras5-dev libcurl4-openssl-dev libgl1-mesa-dev libglu1-mesa-dev libalut-dev libevdev-dev libgles2-mesa-dev cmake
         else
             wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
