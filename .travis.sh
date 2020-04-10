@@ -12,7 +12,6 @@ travis_before_install()
             wget https://madnation.net/uploads/cmake/1bb78-installer.sh
             chmod 755 1bb78-installer.sh
             sudo sh 1bb78-installer.sh --skip-license
-            cd ..
         else
             wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
             chmod a+x linuxdeployqt*.AppImage
