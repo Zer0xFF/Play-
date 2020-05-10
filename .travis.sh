@@ -10,6 +10,8 @@ travis_before_install()
             wget https://purei.org/travis/cmake-3.17.1-Linux-ARM64.sh
             chmod 755 cmake-3.17.1-Linux-ARM64.sh
             sudo sh cmake-3.17.1-Linux-ARM64.sh --skip-license --prefix=/usr/local
+            wget -c "https://github.com/Zer0xFF/linuxdeployqt/releases/download/AArch64/linuxdeployqt-continuous-aarch64.AppImage"
+            chmod a+x linuxdeployqt*.AppImage
         else
             wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
             chmod a+x linuxdeployqt*.AppImage
@@ -90,15 +92,13 @@ travis_script()
             cmake --build . -j $(nproc)
             ctest
             cmake --build . --target install
-            if [ "$TARGET_ARCH" = "x86_64" ]; then
-                mkdir -p appdir/usr/share/doc/libc6/
-                echo "" > appdir/usr/share/doc/libc6/copyright
-                # AppImage Creation
-                unset QTDIR; unset QT_PLUGIN_PATH; unset LD_LIBRARY_PATH;
-                export VERSION="${TRAVIS_COMMIT:0:8}"
-                ../linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -bundle-non-qt-libs -unsupported-allow-new-glibc -qmake=`which qmake`
-                ../linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -appimage -unsupported-allow-new-glibc -qmake=`which qmake`
-            fi
+            mkdir -p appdir/usr/share/doc/libc6/
+            echo "" > appdir/usr/share/doc/libc6/copyright
+            # AppImage Creation
+            unset QTDIR; unset QT_PLUGIN_PATH; unset LD_LIBRARY_PATH;
+            export VERSION="${TRAVIS_COMMIT:0:8}"
+            ../linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -bundle-non-qt-libs -unsupported-allow-new-glibc -qmake=`which qmake`
+            ../linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -appimage -unsupported-allow-new-glibc -qmake=`which qmake`
         elif [ "$TARGET_OS" = "OSX" ]; then
             export CMAKE_PREFIX_PATH="$(brew --prefix qt5)"
             export VULKAN_SDK=$(pwd)/../vulkansdk-macos-${VULKAN_SDK_VERSION}/macOS
@@ -134,8 +134,8 @@ travis_before_deploy()
         return
     fi;
     if [ "$TARGET_OS" = "Linux" ]; then
+        cp ../../build/Play*.AppImage .
         if [ "$TARGET_ARCH" = "x86_64" ]; then
-            cp ../../build/Play*.AppImage .
             cp ../../build/Source/ui_libretro/play_libretro.so play_libretro_linux-x86_64.so
         else
             cp ../../build/Source/ui_libretro/play_libretro.so play_libretro_linux-ARM64.so
