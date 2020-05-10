@@ -88,6 +88,7 @@ travis_script()
             source /opt/qt512/bin/qt512-env.sh || true
             export VULKAN_SDK=$(pwd)/../${VULKAN_SDK_VERSION}/x86_64
             export PATH=$PATH:/opt/qt512/lib/cmake
+            export QT_SELECT=qt5
             cmake .. -G"$BUILD_TYPE" -DCMAKE_INSTALL_PREFIX=./appdir/usr -DBUILD_LIBRETRO_CORE=yes;
             cmake --build . -j $(nproc)
             ctest
