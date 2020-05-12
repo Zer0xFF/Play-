@@ -10,7 +10,7 @@ travis_before_install()
             wget https://purei.org/travis/cmake-3.17.1-Linux-ARM64.sh
             chmod 755 cmake-3.17.1-Linux-ARM64.sh
             sudo sh cmake-3.17.1-Linux-ARM64.sh --skip-license --prefix=/usr/local
-            wget -c "https://madnation.net/uploads/linuxdeployqt/08ad1-linuxdeployqt-continuous-arm64.AppImage" -O linuxdeployqt-continuous-arm64.AppImage
+            wget -c "https://madnation.net/uploads/linuxdeployqt/cff62-linuxdeployqt-continuous-arm64.AppImage" -O linuxdeployqt-continuous-arm64.AppImage
             chmod a+x linuxdeployqt*.AppImage
         else
             wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
