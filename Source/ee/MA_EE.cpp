@@ -253,44 +253,69 @@ void CMA_EE::MMI2()
 void CMA_EE::MFHI1()
 {
 	if(m_nRD == 0) return;
-
+	fprintf(stderr, "%s\n", __FUNCTION__);
+#if 1
+	m_codeGen->PushRel64(offsetof(CMIPS, m_State.nHI1));
+	m_codeGen->PullRel64(offsetof(CMIPS, m_State.nGPR[m_nRD].nD0));
+#else
 	m_codeGen->PushRel(offsetof(CMIPS, m_State.nHI1[0]));
 	m_codeGen->PullRel(offsetof(CMIPS, m_State.nGPR[m_nRD].nV[0]));
 
 	m_codeGen->PushRel(offsetof(CMIPS, m_State.nHI1[1]));
 	m_codeGen->PullRel(offsetof(CMIPS, m_State.nGPR[m_nRD].nV[1]));
+#endif
 }
 
 //11
 void CMA_EE::MTHI1()
 {
+
+#if 1
+	m_codeGen->PushRel64(offsetof(CMIPS, m_State.nGPR[m_nRS].nD0));
+	m_codeGen->PullRel64(offsetof(CMIPS, m_State.nHI1));
+#else
+
 	m_codeGen->PushRel(offsetof(CMIPS, m_State.nGPR[m_nRS].nV[0]));
 	m_codeGen->PullRel(offsetof(CMIPS, m_State.nHI1[0]));
 
 	m_codeGen->PushRel(offsetof(CMIPS, m_State.nGPR[m_nRS].nV[1]));
 	m_codeGen->PullRel(offsetof(CMIPS, m_State.nHI1[1]));
+#endif
+
 }
 
 //12
 void CMA_EE::MFLO1()
 {
 	if(m_nRD == 0) return;
+	fprintf(stderr, "%s\n", __FUNCTION__);
 
+#if 1
+	m_codeGen->PushRel64(offsetof(CMIPS, m_State.nLO1));
+	m_codeGen->PullRel64(offsetof(CMIPS, m_State.nGPR[m_nRD].nD0));
+#else
 	m_codeGen->PushRel(offsetof(CMIPS, m_State.nLO1[0]));
 	m_codeGen->PullRel(offsetof(CMIPS, m_State.nGPR[m_nRD].nV[0]));
 
 	m_codeGen->PushRel(offsetof(CMIPS, m_State.nLO1[1]));
 	m_codeGen->PullRel(offsetof(CMIPS, m_State.nGPR[m_nRD].nV[1]));
+#endif
 }
 
 //13
 void CMA_EE::MTLO1()
 {
+	fprintf(stderr, "%s\n", __FUNCTION__);
+#if 1
+	m_codeGen->PushRel64(offsetof(CMIPS, m_State.nGPR[m_nRS].nD0));
+	m_codeGen->PullRel64(offsetof(CMIPS, m_State.nLO1));
+#else
 	m_codeGen->PushRel(offsetof(CMIPS, m_State.nGPR[m_nRS].nV[0]));
 	m_codeGen->PullRel(offsetof(CMIPS, m_State.nLO1[0]));
 
 	m_codeGen->PushRel(offsetof(CMIPS, m_State.nGPR[m_nRS].nV[1]));
 	m_codeGen->PullRel(offsetof(CMIPS, m_State.nLO1[1]));
+#endif
 }
 
 //18
@@ -678,6 +703,36 @@ void CMA_EE::PEXT5()
 {
 	if(m_nRD == 0) return;
 
+	fprintf(stderr, "%s\n", __FUNCTION__);
+#if 1
+	m_codeGen->MD_PushRel(offsetof(CMIPS, m_State.nGPR[m_nRT]));
+	m_codeGen->MD_SllW(22);
+	m_codeGen->MD_SrlW(27);
+
+	m_codeGen->MD_PushRel(offsetof(CMIPS, m_State.nGPR[m_nRT]));
+	m_codeGen->MD_SrlH(15);
+	m_codeGen->MD_SllW(20);
+
+	m_codeGen->MD_Xor();
+	m_codeGen->MD_SllH(11);
+
+
+	m_codeGen->MD_PushRel(offsetof(CMIPS, m_State.nGPR[m_nRT]));
+	m_codeGen->MD_SllW(17);
+	m_codeGen->MD_SrlH(11);
+
+	m_codeGen->MD_PushRel(offsetof(CMIPS, m_State.nGPR[m_nRT]));
+	m_codeGen->MD_SllW(27);
+	m_codeGen->MD_SrlW(27);
+
+	m_codeGen->MD_Xor();
+	m_codeGen->MD_SllH(3);
+
+	m_codeGen->MD_Xor();
+
+
+	m_codeGen->MD_PullRel(offsetof(CMIPS, m_State.nGPR[m_nRD]));
+#else
 	for(unsigned int i = 0; i < 4; i++)
 	{
 		m_codeGen->PushRel(offsetof(CMIPS, m_State.nGPR[m_nRT].nV[i]));
@@ -705,13 +760,59 @@ void CMA_EE::PEXT5()
 
 		m_codeGen->PullRel(offsetof(CMIPS, m_State.nGPR[m_nRD].nV[i]));
 	}
+#endif
 }
 
 //1F
 void CMA_EE::PPAC5()
 {
 	if(m_nRD == 0) return;
+	fprintf(stderr, "%s\n", __FUNCTION__);
 
+#if 1
+	{
+		m_codeGen->MD_PushRel(offsetof(CMIPS, m_State.nGPR[m_nRT]));
+		m_codeGen->MD_SrlW(11);
+		m_codeGen->MD_SllW(5);
+
+	}
+
+	{
+
+		m_codeGen->MD_PushRel(offsetof(CMIPS, m_State.nGPR[m_nRT]));
+		m_codeGen->MD_SllW(24);
+		m_codeGen->MD_SrlW(27);
+	}
+	m_codeGen->MD_Or();
+
+	// Note: is Jitting 0xffffffff >> 22 more accurate?
+	uint32_t mask = 0xffffffff >> 22;
+	m_codeGen->MD_PushCstExpand(mask);
+	m_codeGen->MD_And();
+
+	{
+		m_codeGen->MD_PushRel(offsetof(CMIPS, m_State.nGPR[m_nRT]));
+		m_codeGen->MD_SllW(8);
+		m_codeGen->MD_SrlW(17);
+	}
+
+	{
+
+		m_codeGen->MD_PushRel(offsetof(CMIPS, m_State.nGPR[m_nRT]));
+		m_codeGen->MD_SrlW(31);
+		m_codeGen->MD_SllW(15);
+	}
+	m_codeGen->MD_Or();
+
+	m_codeGen->MD_PushCstExpand(mask);
+
+	m_codeGen->MD_Not();
+	m_codeGen->MD_And();
+
+	m_codeGen->MD_Or();
+	m_codeGen->MD_PullRel(offsetof(CMIPS, m_State.nGPR[m_nRD]));
+
+#else
 	for(unsigned int i = 0; i < 4; i++)
 	{
 		m_codeGen->PushRel(offsetof(CMIPS, m_State.nGPR[m_nRT].nV[i]));
@@ -739,6 +840,7 @@ void CMA_EE::PPAC5()
 		m_codeGen->Or();
 		m_codeGen->PullRel(offsetof(CMIPS, m_State.nGPR[m_nRD].nV[i]));
 	}
+#endif
 }
 
 //////////////////////////////////////////////////
@@ -749,9 +851,34 @@ void CMA_EE::PPAC5()
 void CMA_EE::PABSW()
 {
 	if(m_nRD == 0) return;
+	fprintf(stderr, "%s\n", __FUNCTION__);
 
 	//RD = (RT != 0x80000000) ? |RT| : 0x7FFFFFFF;
+#if 1
+	auto srcOffset = offsetof(CMIPS, m_State.nGPR[m_nRT]);
+	auto dstOffset = offsetof(CMIPS, m_State.nGPR[m_nRD]);
 
+
+	m_codeGen->MD_PushRel(srcOffset);
+	m_codeGen->MD_SraW(31);
+
+	m_codeGen->PushTop();
+
+	m_codeGen->MD_PushRel(srcOffset);
+	m_codeGen->MD_Xor();
+	m_codeGen->Swap();
+	m_codeGen->MD_SubW();
+
+	m_codeGen->MD_PushCstExpand(0x80000000);
+	// Note: is Jitting 0xffffffff << 31 more accurate?
+	// m_codeGen->MD_PushCstExpand(0xffffffff);
+	// m_codeGen->MD_SllW(31);
+
+	m_codeGen->MD_PushRel(srcOffset);
+	m_codeGen->MD_CmpEqW();
+	m_codeGen->MD_Xor();
+	m_codeGen->MD_PullRel(dstOffset);
+#else
 	for(unsigned int i = 0; i < 4; i++)
 	{
 		auto srcOffset = offsetof(CMIPS, m_State.nGPR[m_nRT].nV[i]);
@@ -786,6 +913,7 @@ void CMA_EE::PABSW()
 		}
 		m_codeGen->EndIf();
 	}
+#endif
 }
 
 //02
@@ -972,24 +1100,40 @@ void CMA_EE::PSRLVW()
 void CMA_EE::PMFHI()
 {
 	if(m_nRD == 0) return;
+	fprintf(stderr, "%s\n", __FUNCTION__);
+#if 1
+	m_codeGen->PushRel64(offsetof(CMIPS, m_State.nHI));
+	m_codeGen->PullRel64(offsetof(CMIPS, m_State.nGPR[m_nRD].nD0));
 
+	m_codeGen->PushRel64(offsetof(CMIPS, m_State.nHI1));
+	m_codeGen->PullRel64(offsetof(CMIPS, m_State.nGPR[m_nRD].nD1));
+#else
 	for(unsigned int i = 0; i < 4; i++)
 	{
 		m_codeGen->PushRel(GetHiOffset(i));
 		m_codeGen->PullRel(offsetof(CMIPS, m_State.nGPR[m_nRD].nV[i]));
 	}
+#endif
 }
 
 //09
 void CMA_EE::PMFLO()
 {
 	if(m_nRD == 0) return;
+	fprintf(stderr, "%s\n", __FUNCTION__);
+#if 1
+	m_codeGen->PushRel64(offsetof(CMIPS, m_State.nLO));
+	m_codeGen->PullRel64(offsetof(CMIPS, m_State.nGPR[m_nRD].nD0));
 
+	m_codeGen->PushRel64(offsetof(CMIPS, m_State.nLO1));
+	m_codeGen->PullRel64(offsetof(CMIPS, m_State.nGPR[m_nRD].nD1));
+#else
 	for(unsigned int i = 0; i < 4; i++)
 	{
 		m_codeGen->PushRel(GetLoOffset(i));
 		m_codeGen->PullRel(offsetof(CMIPS, m_State.nGPR[m_nRD].nV[i]));
 	}
+#endif
 }
 
 //0C
@@ -1342,28 +1486,57 @@ void CMA_EE::PSRAVW()
 //08
 void CMA_EE::PMTHI()
 {
+	fprintf(stderr, "%s\n", __FUNCTION__);
+#if 1
+	m_codeGen->PushRel64(offsetof(CMIPS, m_State.nGPR[m_nRS].nD0));
+	m_codeGen->PullRel64(offsetof(CMIPS, m_State.nHI));
+
+	m_codeGen->PushRel64(offsetof(CMIPS, m_State.nGPR[m_nRS].nD1));
+	m_codeGen->PullRel64(offsetof(CMIPS, m_State.nHI1));
+#else
 	for(unsigned int i = 0; i < 4; i++)
 	{
 		m_codeGen->PushRel(offsetof(CMIPS, m_State.nGPR[m_nRS].nV[i]));
 		m_codeGen->PullRel(GetHiOffset(i));
 	}
+#endif
 }
 
 //09
 void CMA_EE::PMTLO()
 {
+	fprintf(stderr, "%s\n", __FUNCTION__);
+#if 1
+	m_codeGen->PushRel64(offsetof(CMIPS, m_State.nGPR[m_nRS].nD0));
+	m_codeGen->PullRel64(offsetof(CMIPS, m_State.nLO));
+
+	m_codeGen->PushRel64(offsetof(CMIPS, m_State.nGPR[m_nRS].nD1));
+	m_codeGen->PullRel64(offsetof(CMIPS, m_State.nLO1));
+#else
 	for(unsigned int i = 0; i < 4; i++)
 	{
 		m_codeGen->PushRel(offsetof(CMIPS, m_State.nGPR[m_nRS].nV[i]));
 		m_codeGen->PullRel(GetLoOffset(i));
 	}
+#endif
 }
 
 //0A
 void CMA_EE::PINTEH()
 {
 	if(m_nRD == 0) return;
+	fprintf(stderr, "%s\n", __FUNCTION__);
+#if 1
+		m_codeGen->MD_PushRel(offsetof(CMIPS, m_State.nGPR[m_nRS]));
+		m_codeGen->MD_SllW(16);
 
+		m_codeGen->MD_PushRel(offsetof(CMIPS, m_State.nGPR[m_nRT]));
+		m_codeGen->MD_SllW(16);
+		m_codeGen->MD_SrlW(16);
+
+		m_codeGen->MD_Or();
+		m_codeGen->MD_PullRel(offsetof(CMIPS, m_State.nGPR[m_nRD]));
+#else
 	for(unsigned int i = 0; i < 4; i++)
 	{
 		m_codeGen->PushRel(offsetof(CMIPS, m_State.nGPR[m_nRS].nV[i]));
@@ -1378,6 +1551,7 @@ void CMA_EE::PINTEH()
 		m_codeGen->Or();
 		m_codeGen->PullRel(offsetof(CMIPS, m_State.nGPR[m_nRD].nV[i]));
 	}
+#endif
 }
 
 //0C
