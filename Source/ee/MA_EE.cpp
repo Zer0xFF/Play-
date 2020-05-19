@@ -1240,6 +1240,8 @@ void CMA_EE::PMADDH()
 //11
 void CMA_EE::PHMADH()
 {
+	fprintf(stderr, "%s\n", __FUNCTION__);
+
 	static const size_t offsets[4] =
 	    {
 	        offsetof(CMIPS, m_State.nLO[0]),
@@ -1256,12 +1258,13 @@ void CMA_EE::PHMADH()
 	        offsetof(CMIPS, m_State.nHI1[1]),
 	    };
 
+#if 0
 	for(unsigned int i = 0; i < 4; i++)
 	{
 		m_codeGen->PushCst(0);
 		m_codeGen->PullRel(clearOffsets[i]);
 	}
-
+#endif
 	for(unsigned int i = 0; i < 4; i++)
 	{
 		//Lower 16-bits (An0 * An1)
@@ -1286,6 +1289,12 @@ void CMA_EE::PHMADH()
 
 			m_codeGen->MultS();
 			m_codeGen->ExtLow64();
+#if 1
+			//PCSX2: pper word of each doubleword in LO and HI is undocumented/undefined
+			//contains the upper multiplication result (before the addition with the lower multiplication result)
+			m_codeGen->PushTop();
+			m_codeGen->PullRel(clearOffsets[i]);
+#endif
 		}
 
 		m_codeGen->Add();
