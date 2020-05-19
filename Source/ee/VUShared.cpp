@@ -1114,7 +1114,6 @@ void VUShared::MINIi(CMipsJitter* codeGen, uint8 dest, uint8 fd, uint8 fs)
 
 void VUShared::MOVE(CMipsJitter* codeGen, uint8 nDest, uint8 nFt, uint8 nFs)
 {
-	fprintf(stderr, "%s\n", __FUNCTION__);
 
 #if 1
 	codeGen->MD_PushRel(offsetof(CMIPS, m_State.nCOP2[nFs]));
@@ -1398,7 +1397,6 @@ void VUShared::RGET(CMipsJitter* codeGen, uint8 dest, uint8 ft)
 
 void VUShared::RNEXT(CMipsJitter* codeGen, uint8 dest, uint8 ft)
 {
-	fprintf(stderr, "%s\n", __FUNCTION__);
 	//Compute next R
 #if 1
 	codeGen->PushRel(offsetof(CMIPS, m_State.nCOP2R));

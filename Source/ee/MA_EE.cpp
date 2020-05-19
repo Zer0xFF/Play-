@@ -253,7 +253,6 @@ void CMA_EE::MMI2()
 void CMA_EE::MFHI1()
 {
 	if(m_nRD == 0) return;
-	fprintf(stderr, "%s\n", __FUNCTION__);
 #if 1
 	m_codeGen->PushRel64(offsetof(CMIPS, m_State.nHI1));
 	m_codeGen->PullRel64(offsetof(CMIPS, m_State.nGPR[m_nRD].nD0));
@@ -288,7 +287,6 @@ void CMA_EE::MTHI1()
 void CMA_EE::MFLO1()
 {
 	if(m_nRD == 0) return;
-	fprintf(stderr, "%s\n", __FUNCTION__);
 
 #if 1
 	m_codeGen->PushRel64(offsetof(CMIPS, m_State.nLO1));
@@ -305,7 +303,6 @@ void CMA_EE::MFLO1()
 //13
 void CMA_EE::MTLO1()
 {
-	fprintf(stderr, "%s\n", __FUNCTION__);
 #if 1
 	m_codeGen->PushRel64(offsetof(CMIPS, m_State.nGPR[m_nRS].nD0));
 	m_codeGen->PullRel64(offsetof(CMIPS, m_State.nLO1));
@@ -703,7 +700,6 @@ void CMA_EE::PEXT5()
 {
 	if(m_nRD == 0) return;
 
-	fprintf(stderr, "%s\n", __FUNCTION__);
 #if 1
 	m_codeGen->MD_PushRel(offsetof(CMIPS, m_State.nGPR[m_nRT]));
 	m_codeGen->MD_SllW(22);
@@ -767,7 +763,6 @@ void CMA_EE::PEXT5()
 void CMA_EE::PPAC5()
 {
 	if(m_nRD == 0) return;
-	fprintf(stderr, "%s\n", __FUNCTION__);
 
 #if 1
 	{
@@ -851,7 +846,6 @@ void CMA_EE::PPAC5()
 void CMA_EE::PABSW()
 {
 	if(m_nRD == 0) return;
-	fprintf(stderr, "%s\n", __FUNCTION__);
 
 	//RD = (RT != 0x80000000) ? |RT| : 0x7FFFFFFF;
 #if 1
@@ -1100,7 +1094,6 @@ void CMA_EE::PSRLVW()
 void CMA_EE::PMFHI()
 {
 	if(m_nRD == 0) return;
-	fprintf(stderr, "%s\n", __FUNCTION__);
 #if 1
 	m_codeGen->PushRel64(offsetof(CMIPS, m_State.nHI));
 	m_codeGen->PullRel64(offsetof(CMIPS, m_State.nGPR[m_nRD].nD0));
@@ -1120,7 +1113,6 @@ void CMA_EE::PMFHI()
 void CMA_EE::PMFLO()
 {
 	if(m_nRD == 0) return;
-	fprintf(stderr, "%s\n", __FUNCTION__);
 #if 1
 	m_codeGen->PushRel64(offsetof(CMIPS, m_State.nLO));
 	m_codeGen->PullRel64(offsetof(CMIPS, m_State.nGPR[m_nRD].nD0));
@@ -1240,7 +1232,6 @@ void CMA_EE::PMADDH()
 //11
 void CMA_EE::PHMADH()
 {
-	fprintf(stderr, "%s\n", __FUNCTION__);
 
 	static const size_t offsets[4] =
 	    {
@@ -1495,7 +1486,6 @@ void CMA_EE::PSRAVW()
 //08
 void CMA_EE::PMTHI()
 {
-	fprintf(stderr, "%s\n", __FUNCTION__);
 #if 1
 	m_codeGen->PushRel64(offsetof(CMIPS, m_State.nGPR[m_nRS].nD0));
 	m_codeGen->PullRel64(offsetof(CMIPS, m_State.nHI));
@@ -1514,7 +1504,6 @@ void CMA_EE::PMTHI()
 //09
 void CMA_EE::PMTLO()
 {
-	fprintf(stderr, "%s\n", __FUNCTION__);
 #if 1
 	m_codeGen->PushRel64(offsetof(CMIPS, m_State.nGPR[m_nRS].nD0));
 	m_codeGen->PullRel64(offsetof(CMIPS, m_State.nLO));
@@ -1534,7 +1523,6 @@ void CMA_EE::PMTLO()
 void CMA_EE::PINTEH()
 {
 	if(m_nRD == 0) return;
-	fprintf(stderr, "%s\n", __FUNCTION__);
 #if 1
 		m_codeGen->MD_PushRel(offsetof(CMIPS, m_State.nGPR[m_nRS]));
 		m_codeGen->MD_SllW(16);

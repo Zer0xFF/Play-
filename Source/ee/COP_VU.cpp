@@ -174,7 +174,6 @@ void CCOP_VU::CFC2()
 			m_codeGen->PushRel(offsetof(CMIPS, m_State.nCOP2R));
 			break;
 		case CTRL_REG_CMSAR0:
-			fprintf(stderr, "Get CTRL_REG_CMSAR0");
 			m_codeGen->PushRel(offsetof(CMIPS, m_State.cmsar0));
 			break;
 		case CTRL_REG_MAC:
