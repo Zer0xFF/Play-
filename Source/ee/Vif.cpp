@@ -348,7 +348,9 @@ void CVif::ProcessPacket(StreamType& stream)
 		if(m_CODE.nI != 0)
 		{
 			//Next command will be stalled (if not MARK)
-			if(m_CODE.nCMD != CODE_CMD_MARK)
+			if(m_CODE.nCMD != CODE_CMD_MARK
+				&& m_CODE.nCMD != 0x2
+			)
 			{
 				m_STAT.nVIS = 1;
 			}
@@ -877,6 +879,8 @@ bool CVif::Unpack_V8(StreamType& stream, uint128& result, unsigned int fields, b
 		}
 
 		result.nV[i] = temp;
+		if(fields == 2)
+			result.nV[i + fields] = temp;
 	}
 
 	return true;
@@ -896,6 +900,8 @@ bool CVif::Unpack_V16(StreamType& stream, uint128& result, unsigned int fields, 
 		}
 
 		result.nV[i] = temp;
+		if(fields == 2)
+			result.nV[i + fields] = temp;
 	}
 
 	return true;
@@ -906,6 +912,8 @@ bool CVif::Unpack_V32(StreamType& stream, uint128& result, unsigned int fields)
 	if(stream.GetAvailableReadBytes() < (fields * 4)) return false;
 
 	stream.Read(&result, (fields * 4));
+	if(fields == 2)
+		result.nD1 = result.nD0;
 
 	return true;
 }
