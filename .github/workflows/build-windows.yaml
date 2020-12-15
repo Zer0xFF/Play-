@@ -20,10 +20,10 @@ jobs:
     - name: Install Vulkan SDK
       run: |
         cd $RUNNER_WORKSPACE
-        echo "::warning::https://sdk.lunarg.com/sdk/download/${VULKAN_SDK_VERSION}/windows/VulkanSDK-${VULKAN_SDK_VERSION}-Installer.exe?Human=true"
-        curl --output  VulkanSDK.exe https://sdk.lunarg.com/sdk/download/${VULKAN_SDK_VERSION}/windows/VulkanSDK-${VULKAN_SDK_VERSION}-Installer.exe?Human=true
+        echo "::warning::https://sdk.lunarg.com/sdk/download/${{ env.VULKAN_SDK_VERSION }}/windows/VulkanSDK-${{ env.VULKAN_SDK_VERSION }}-Installer.exe?Human=true"
+        curl --output  VulkanSDK.exe https://sdk.lunarg.com/sdk/download/${{ env.VULKAN_SDK_VERSION }}/windows/VulkanSDK-${{ env.VULKAN_SDK_VERSION }}-Installer.exe?Human=true
         .\VulkanSDK.exe /S
-        echo "VULKAN_SDK=C:\VulkanSDK\${VULKAN_SDK_VERSION}" >> $GITHUB_ENV
+        echo "VULKAN_SDK=C:\VulkanSDK\${{ env.VULKAN_SDK_VERSION }}" >> $GITHUB_ENV
         echo "::warning::${VULKAN_SDK}"
 
     - name: Install Qt
