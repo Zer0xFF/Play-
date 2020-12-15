@@ -17,16 +17,36 @@ jobs:
       with:
         path: ../Qt
         key: ${{ runner.os }}-QtCache
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+      with:
+        vs-version: '[15.2,15.9)'
+
     - name: Install Vulkan SDK
       run: |
         cd $RUNNER_WORKSPACE
-        echo "::warning::https://sdk.lunarg.com/sdk/download/${{ env.VULKAN_SDK_VERSION }}/windows/VulkanSDK-${{ env.VULKAN_SDK_VERSION }}-Installer.exe?Human=true"
-        curl --output  VulkanSDK.exe https://sdk.lunarg.com/sdk/download/${{ env.VULKAN_SDK_VERSION }}/windows/VulkanSDK-${{ env.VULKAN_SDK_VERSION }}-Installer.exe?Human=true
+        curl -L --silent --show-error --output VulkanSDK.exe https://sdk.lunarg.com/sdk/download/${{ env.VULKAN_SDK_VERSION }}/windows/VulkanSDK-${{ env.VULKAN_SDK_VERSION }}-Installer.exe?Human=true
         .\VulkanSDK.exe /S
         echo "VULKAN_SDK=C:\VulkanSDK\${{ env.VULKAN_SDK_VERSION }}" >> $GITHUB_ENV
-        echo "::warning::${VULKAN_SDK}"
 
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
+
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        fetch-depth: 0
+    - name: Set SHORT_HASH
+      run: echo "::set-output name=VALUE::${LONG_HASH:0:8}"
+      id: short_hash
+      env:
+        LONG_HASH: ${{ github.sha }}
+    - name: Generate CMake Project
+      run: |
+        mkdir build
+        cd build
+        cmake .. -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=./appdir/usr -DBUILD_LIBRETRO_CORE=yes
