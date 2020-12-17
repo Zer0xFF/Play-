@@ -20,8 +20,6 @@ jobs:
 
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
-      with:
-        vs-version: '[15.2,15.9)'
 
     - name: Install Vulkan SDK
       run: |
