@@ -19,11 +19,11 @@ jobs:
             installer-script: 'installer64.nsi'
     runs-on: windows-latest
 
+
+    steps:
     - name: Prepare Installer Package
       run: |
         makensis.exe .\installer_win32\${{ matrix.installer-script}}
-
-    steps:
     - name: Cache Qt
       id: cache-qt
       uses: actions/cache@v1
