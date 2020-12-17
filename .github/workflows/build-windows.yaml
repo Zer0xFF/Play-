@@ -43,6 +43,9 @@ jobs:
         arch: ${{ matrix.qt-arch }}
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
+    - name: echo
+      run: echo "::warning::${{ env.Qt5_DIR }}"
+
     - name: Checkout
       uses: actions/checkout@v2
       with:
@@ -74,7 +77,7 @@ jobs:
     - name: Prepare Installer Package
       run: |
         cd build
-        ${{ env.QQt5_DIR }}\bin\windeployqt.exe ./Source/ui_qt/Release --no-system-d3d-compiler --no-quick-import --no-opengl-sw --no-compiler-runtime --no-translations
+        ${{ env.Qt5_DIR }}\bin\windeployqt.exe ./Source/ui_qt/Release --no-system-d3d-compiler --no-quick-import --no-opengl-sw --no-compiler-runtime --no-translations
 
         cd ..
         makensis.exe .\installer_win32\${{ matrix.installer-script}}
