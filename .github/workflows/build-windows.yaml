@@ -59,4 +59,3 @@ jobs:
       run: |
         cd build
         ctest -C Release
-    - name: Prepare AppImage Package
