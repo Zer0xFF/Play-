@@ -7,8 +7,8 @@ jobs:
   build_windows:
     strategy:
       matrix:
-        # build-type: ['play!', 'psfplayer']
-        target-platform: ['x86', 'x64']
+        build-type: ['Visual Studio 15 2017', 'Visual Studio 15 2017 Win64']
+        # target-platform: ['x86', 'x64']
     runs-on: windows-latest
     steps:
     - name: Cache Qt
@@ -47,4 +47,16 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake .. -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=./appdir/usr -DBUILD_LIBRETRO_CORE=yes
+        cmake .. -G"${{ env.BUILD_TYPE }}" -T v141_xp -DUSE_QT=on -DBUILD_LIBRETRO_CORE=yes
+      env:
+        BUILD_TYPE : ${{ matrix.build-type }}
+
+    - name: Build
+      run: |
+        cd build
+        cmake --build . --config Release
+    - name: Run Tests
+      run: |
+        cd build
+        ctest -C Release
+    - name: Prepare AppImage Package
