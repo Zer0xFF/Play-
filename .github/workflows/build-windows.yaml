@@ -13,10 +13,10 @@ jobs:
         include: 
           - target-platform: 'x64'
             qt-arch: 'win64_msvc2019_64'
-            installer-script: 'installer32.NSI'
+            installer-script: 'installer32.nsi'
           - target-platform: 'Win32'
             qt-arch: 'win32_msvc2019'
-            installer-script: 'installer64.NSI'
+            installer-script: 'installer64.nsi'
     runs-on: windows-latest
     steps:
     - name: Cache Qt
@@ -78,3 +78,15 @@ jobs:
 
         cd ..
         "C:\Program Files (x86)\NSIS\makensis.exe" ./installer_win32/${{ matrix.installer-script}}
+
+    - name: Upload a Build Artifact ${{ env.TARGET_PLATFORM }} Installer
+      uses: actions/upload-artifact@v2
+      with:
+        name: Play_Windows_${{ env.TARGET_PLATFORM }}_Installer
+        path: installer_win32\*.exe
+
+    - name: Upload a Build Artifact ${{ env.TARGET_PLATFORM }} libretro
+      uses: actions/upload-artifact@v2
+      with:
+        name: Play_Windows_${{ env.TARGET_PLATFORM }}_Installer
+        path: build\Source\ui_libretro\Release\play_libretro.dll
