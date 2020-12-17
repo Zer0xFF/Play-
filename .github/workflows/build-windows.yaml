@@ -3,12 +3,18 @@ name: Build Windows
 on: [push, pull_request]
 env:
   VULKAN_SDK_VERSION: '1.2.131.1'
+  QT_VERSION: '5.15.2'
 jobs:
   build_windows:
     strategy:
       matrix:
         build-type: ['Visual Studio 16 2019']
         target-platform: ['x64', 'Win32']
+        include: 
+          - target-platform: 'x64'
+            qt-arch: 'win64_msvc2019_64'
+          - target-platform: 'Win32'
+            qt-arch: 'win32_msvc2019'
     runs-on: windows-latest
     steps:
     - name: Cache Qt
@@ -31,6 +37,8 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
+        version: ${{ env.QT_VERSION }}
+        arch: ${{ matrix.qt-arch }}
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
     - name: Checkout
@@ -49,8 +57,8 @@ jobs:
         cd build
         cmake .. -G"${{ env.BUILD_TYPE }}" -A ${{ env.TARGET_PLATFORM }} -T v141_xp -DUSE_QT=on -DBUILD_LIBRETRO_CORE=yes
       env:
-        BUILD_TYPE : ${{ matrix.build-type }}
-        TARGET_PLATFORM : ${{ matrix.target-platform }}
+        BUILD_TYPE: ${{ matrix.build-type }}
+        TARGET_PLATFORM: ${{ matrix.target-platform }}
 
     - name: Build
       run: |
