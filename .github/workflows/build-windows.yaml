@@ -13,10 +13,10 @@ jobs:
         include: 
           - target-platform: 'x64'
             qt-arch: 'win64_msvc2019_64'
-            installer-script: 'installer32.nsi'
+            installer-script: 'installer64.nsi'
           - target-platform: 'Win32'
             qt-arch: 'win32_msvc2019'
-            installer-script: 'installer64.nsi'
+            installer-script: 'installer32.nsi'
     runs-on: windows-latest
     steps:
     - name: Cache Qt
@@ -25,27 +25,20 @@ jobs:
       with:
         path: ../Qt
         key: ${{ runner.os }}-${{ matrix.qt-arch }}-QtCache
-
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
-
     - name: Install Vulkan SDK
       run: |
         cd $RUNNER_WORKSPACE
         curl -L --silent --show-error --output VulkanSDK.exe https://sdk.lunarg.com/sdk/download/${{ env.VULKAN_SDK_VERSION }}/windows/VulkanSDK-${{ env.VULKAN_SDK_VERSION }}-Installer.exe?Human=true
         .\VulkanSDK.exe /S
         echo "VULKAN_SDK=C:\VulkanSDK\${{ env.VULKAN_SDK_VERSION }}" >> $GITHUB_ENV
-
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
         version: ${{ env.QT_VERSION }}
         arch: ${{ matrix.qt-arch }}
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
-
-    - name: echo
-      run: echo "::warning::${{ env.Qt5_DIR }}"
-
     - name: Checkout
       uses: actions/checkout@v2
       with:
@@ -64,7 +57,6 @@ jobs:
       env:
         BUILD_TYPE: ${{ matrix.build-type }}
         TARGET_PLATFORM: ${{ matrix.target-platform }}
-
     - name: Build
       run: |
         cd build
@@ -81,13 +73,11 @@ jobs:
 
         cd ..
         makensis.exe .\installer_win32\${{ matrix.installer-script}}
-
     - name: Upload a Build Artifact Installer
       uses: actions/upload-artifact@v2
       with:
         name: Play_Windows_${{ env.TARGET_PLATFORM }}_Installer
         path: installer_win32\*.exe
-
     - name: Upload a Build Artifact Libretro Core
       uses: actions/upload-artifact@v2
       with:
