@@ -13,8 +13,10 @@ jobs:
         include: 
           - target-platform: 'x64'
             qt-arch: 'win64_msvc2019_64'
+            installer-script: 'installer32.NSI'
           - target-platform: 'Win32'
             qt-arch: 'win32_msvc2019'
+            installer-script: 'installer64.NSI'
     runs-on: windows-latest
     steps:
     - name: Cache Qt
@@ -68,3 +70,11 @@ jobs:
       run: |
         cd build
         ctest -C Release
+
+    - name: Prepare Installer Package
+      run: |
+        cd build
+        ${{ env.QQt5_DIR }}\bin\windeployqt.exe ./Source/ui_qt/Release --no-system-d3d-compiler --no-quick-import --no-opengl-sw --no-compiler-runtime --no-translations
+
+        cd ..
+        "C:\Program Files (x86)\NSIS\makensis.exe" ./installer_win32/${{ matrix.installer-script}}
