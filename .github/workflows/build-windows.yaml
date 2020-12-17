@@ -72,7 +72,7 @@ jobs:
         ${{ env.Qt5_DIR }}\bin\windeployqt.exe ./Source/ui_qt/Release --no-system-d3d-compiler --no-quick-import --no-opengl-sw --no-compiler-runtime --no-translations
 
         cd ..
-        makensis.exe .\installer_win32\${{ matrix.installer-script}}
+        makensis.exe ./installer_win32/${{ matrix.installer-script}}
     - name: Upload a Build Artifact Installer
       uses: actions/upload-artifact@v2
       with:
