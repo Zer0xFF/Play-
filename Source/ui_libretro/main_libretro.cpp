@@ -16,6 +16,7 @@
 #include "filesystem_def.h"
 #include <vector>
 #include <cstdlib>
+#include <condition_variable>
 
 #define LOG_NAME "LIBRETRO"
 
@@ -571,12 +572,32 @@ void retro_deinit()
 
 	if(m_virtualMachine)
 	{
+		bool done = false;
+		std::mutex dctor_mutex;
+		std::condition_variable waitCondition;
+		m_virtualMachine->PauseAsync();
+
+		auto virtualMachine = m_virtualMachine;
+		auto connection = m_virtualMachine->OnRunningStateChange.Connect([&virtualMachine, &done, &waitCondition]() mutable 
+		{
+			if(m_virtualMachine->GetStatus() != CVirtualMachine::PAUSED)
+				return;
+
+			waitCondition.notify_one();
+			done = true;
+		});
+
 		// Note: since we're forced GS into running on this thread
 		// we need to clear its queue, to prevent it freezing the reset of the system during delete
-		m_virtualMachine->PauseAsync();
 		auto gsHandler = m_virtualMachine->GetGSHandler();
 		if(gsHandler)
 			static_cast<CGSH_OpenGL_Libretro*>(gsHandler)->Release();
+
+		std::unique_lock<std::mutex> dctor_lock(dctor_mutex);
+		waitCondition.wait(dctor_lock, [&done]()
+		{
+			return done;
+		});
 
 		m_virtualMachine->DestroyPadHandler();
 		m_virtualMachine->DestroyGSHandler();
