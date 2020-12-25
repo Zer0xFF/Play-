@@ -53,10 +53,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake .. -G"${{ env.BUILD_TYPE }}" -A ${{ env.TARGET_PLATFORM }} -T v141_xp -DUSE_QT=on -DBUILD_LIBRETRO_CORE=yes
-      env:
-        BUILD_TYPE: ${{ matrix.build-type }}
-        TARGET_PLATFORM: ${{ matrix.target-platform }}
+        cmake .. -G"${{ matrix.build-type }}" -A ${{ matrix.target-platform }} -T v141_xp -DUSE_QT=on -DBUILD_LIBRETRO_CORE=yes
     - name: Build
       run: |
         cd build
@@ -76,10 +73,10 @@ jobs:
     - name: Upload a Build Artifact Installer
       uses: actions/upload-artifact@v2
       with:
-        name: Play_Windows_${{ env.TARGET_PLATFORM }}_Installer
+        name: Play_Windows_${{ matrix.target-platform }}_Installer
         path: installer_win32\*.exe
     - name: Upload a Build Artifact Libretro Core
       uses: actions/upload-artifact@v2
       with:
-        name: Play_Windows_${{ env.TARGET_PLATFORM }}_Installer
+        name: Play_Windows_${{ matrix.target-platform }}_Installer
         path: build\Source\ui_libretro\Release\play_libretro.dll
