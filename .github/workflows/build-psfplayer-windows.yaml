@@ -21,4 +21,5 @@ jobs:
         fetch-depth: 0
     - name: Run Tests
       run: |
+        git fetch --tags
         git describe
