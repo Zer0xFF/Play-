@@ -10,7 +10,6 @@ jobs:
         build-type: ['Visual Studio 16 2019']
         target-platform: ['x64']
         config-type: ['Release']
-        target-platform: ['x64']
         qt-arch: ['win64_msvc2019_64']
         installer-script: ['installer64.nsi']
     runs-on: windows-latest
