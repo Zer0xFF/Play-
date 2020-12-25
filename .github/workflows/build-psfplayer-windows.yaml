@@ -14,49 +14,11 @@ jobs:
         installer-script: ['installer64.nsi']
     runs-on: windows-latest
     steps:
-    - name: Cache Qt
-      id: cache-qt
-      uses: actions/cache@v1
-      with:
-        path: ../Qt
-        key: ${{ runner.os }}-${{ matrix.qt-arch }}-QtCache
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v2
-      with:
-        version: ${{ env.QT_VERSION }}
-        arch: ${{ matrix.qt-arch }}
-        cached: ${{ steps.cache-qt.outputs.cache-hit }}
     - name: Checkout
       uses: actions/checkout@v2
       with:
         submodules: recursive
         fetch-depth: 0
-    - name: Set SHORT_HASH
-      run: echo "::set-output name=VALUE::${LONG_HASH:0:8}"
-      id: short_hash
-      env:
-        LONG_HASH: ${{ github.sha }}
-    - name: Generate CMake Project
-      run: |
-        mkdir build
-        cd build
-        cmake .. -G"${{ matrix.build-type }}" -A ${{ matrix.target-platform }} -T v141_xp -DBUILD_PLAY=off -DBUILD_TESTS=off -DBUILD_PSFPLAYER=on
-    - name: Build
-      run: |
-        cd build
-        cmake --build . --config ${{ matrix.config-type }}
     - name: Run Tests
       run: |
-        cd build
-        ctest -C ${{ matrix.config-type }}
-
-    - name: Prepare Installer Package
-      run: |
-        makensis.exe ./tools/PsfPlayer/installer_win32/${{ matrix.installer-script}}
-    - name: Upload a Build Artifact Installer
-      uses: actions/upload-artifact@v2
-      with:
-        name: Play_Windows_${{ matrix.target-platform }}_Installer
-        path: tools\PsfPlayer\installer_win32\*.exe
+        git describe
