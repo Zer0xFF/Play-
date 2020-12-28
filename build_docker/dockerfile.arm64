@@ -1,0 +1,15 @@
+FROM --platform=linux/arm64 debian:sid
+
+RUN apt update
+RUN apt install -y wget curl git cmake g++ qt5-qmake pkg-config fuse file qtbase5-dev zlib1g-dev libbz2-dev libcurl4-openssl-dev libgl1-mesa-dev libglu1-mesa-dev libalut-dev libevdev-dev libgles2-mesa-dev
+
+RUN mkdir /play-
+WORKDIR /play-
+ENV QT_SELECT qt5
+
+ADD . /play-
+
+RUN mkdir build
+WORKDIR /play-/build
+RUN cmake .. -DCMAKE_BUILD_TYPE=Release
+RUN make -j16
