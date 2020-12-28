@@ -1,7 +1,7 @@
 FROM --platform=linux/arm64 debian:sid
 
 RUN apt update
-RUN apt install -y wget curl git cmake g++ qt5-qmake pkg-config fuse file qtbase5-dev zlib1g-dev libbz2-dev libcurl4-openssl-dev libgl1-mesa-dev libglu1-mesa-dev libalut-dev libevdev-dev libgles2-mesa-dev
+RUN apt install -y wget curl git cmake g++ qt5-qmake pkg-config fuse file qtbase5-dev libqt5x11extras5-dev zlib1g-dev libbz2-dev libcurl4-openssl-dev libgl1-mesa-dev libglu1-mesa-dev libalut-dev libevdev-dev libgles2-mesa-dev
 
 RUN mkdir /play-
 WORKDIR /play-
