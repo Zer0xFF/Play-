@@ -60,7 +60,7 @@ def prepare_folders():
     os.makedirs(os.path.join(qt_base, "plugins"))
 
     for name in ["cmake", "metatypes", "pkgconfig"]:
-        shutil.copytree( os.path.join(lib_orig, name), os.path.join(qt_base, "lib", name))
+        shutil.copytree( os.path.join(lib_orig, name), os.path.join(qt_base, "lib", name), symlinks=True)
 
 if __name__ == "__main__":
     args = sys.argv[1:]
