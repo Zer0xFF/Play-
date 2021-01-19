@@ -10,6 +10,7 @@
 #include "GSHandler.h"
 #include "GsPixelFormats.h"
 #include "string_format.h"
+#include <iostream>
 
 //Shadow Hearts 2 looks for this specific value
 #define GS_REVISION (7)
@@ -865,7 +866,13 @@ void CGSHandler::BeginTransferWrite()
 void CGSHandler::TransferWrite(const uint8* imageData, uint32 length)
 {
 	auto bltBuf = make_convertible<BITBLTBUF>(m_nReg[GS_REG_BITBLTBUF]);
+
+	// auto t1 = std::chrono::high_resolution_clock::now();
 	m_trxCtx.nDirty |= ((this)->*(m_transferWriteHandlers[bltBuf.nDstPsm]))(imageData, length);
+	// auto t2 = std::chrono::high_resolution_clock::now();
+
+	// auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+	// CLog::GetInstance().Warn("TW", "Len: 0x%05X - Type: %02d - MS: %d\n", length, bltBuf.nDstPsm, duration);
 }
 
 bool CGSHandler::TransferWriteHandlerInvalid(const void* pData, uint32 nLength)

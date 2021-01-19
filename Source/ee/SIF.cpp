@@ -691,7 +691,7 @@ void CSIF::SetRegister(uint32 nRegister, uint32 nValue)
 		//Set by RPC library (initialized state?)
 		break;
 	default:
-		CLog::GetInstance().Warn(LOG_NAME, "Warning. Trying to write to an invalid system register (0x%08X).\r\n", nRegister);
+		CLog::GetInstance().Warn(LOG_NAME, "Warning. Trying to write to an invalid system register (0x%08X - value: %d).\r\n", nRegister, nValue);
 		break;
 	}
 }

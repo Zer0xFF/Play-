@@ -19,6 +19,7 @@ namespace Iop
 
 		void __printf(CMIPS&);
 		int32 __puts(uint32);
+		void __fdprintf(CMIPS&);
 		std::string PrintFormatted(const char*, CArgumentIterator&);
 
 	private:

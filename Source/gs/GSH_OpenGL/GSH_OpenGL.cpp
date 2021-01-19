@@ -475,6 +475,7 @@ Framework::OpenGl::ProgramPtr CGSH_OpenGL::GetShaderFromCaps(const SHADERCAPS& s
 	if(shaderIterator == m_shaders.end())
 	{
 		auto shader = GenerateShader(shaderCaps);
+		OnNewShaderCap(static_cast<uint32>(shaderCaps));
 
 		glUseProgram(*shader);
 		m_validGlState &= ~GLSTATE_PROGRAM;
@@ -2532,6 +2533,57 @@ void CGSH_OpenGL::ResolveFramebufferMultisample(const FramebufferPtr& framebuffe
 	framebuffer->m_resolveNeeded = false;
 }
 
+const std::vector<uint32> CGSH_OpenGL::GetShaderCaps()
+{
+	std::vector<uint32> shaderCaps;
+	for(auto& shader : m_shaders)
+	{
+		shaderCaps.push_back(shader.first);
+	}
+	return shaderCaps;
+}
+
+void CGSH_OpenGL::LoadShaderCap(std::vector<uint32> shaderCaps)
+{
+		SendGSCall(
+	    [this, shaderCaps]() {
+			for(auto& shaderCap : shaderCaps)
+			{
+				auto shaderIterator = m_shaders.find(shaderCap);
+				if(shaderIterator == m_shaders.end())
+				{
+					auto shader = GenerateShader(make_convertible<SHADERCAPS>(shaderCap));
+					glUseProgram(*shader);
+					m_validGlState &= ~GLSTATE_PROGRAM;
+
+					auto textureUniform = glGetUniformLocation(*shader, "g_texture");
+					if(textureUniform != -1)
+					{
+						glUniform1i(textureUniform, 0);
+					}
+
+					auto paletteUniform = glGetUniformLocation(*shader, "g_palette");
+					if(paletteUniform != -1)
+					{
+						glUniform1i(paletteUniform, 1);
+					}
+
+					auto vertexParamsUniformBlock = glGetUniformBlockIndex(*shader, "VertexParams");
+					if(vertexParamsUniformBlock != GL_INVALID_INDEX)
+					{
+						glUniformBlockBinding(*shader, vertexParamsUniformBlock, 0);
+					}
+
+					auto fragmentParamsUniformBlock = glGetUniformBlockIndex(*shader, "FragmentParams");
+					if(fragmentParamsUniformBlock != GL_INVALID_INDEX)
+					{
+						glUniformBlockBinding(*shader, fragmentParamsUniformBlock, 1);
+					}
+					m_shaders.insert(std::make_pair(shaderCap, shader));
+				}
+			}
+	    });
+}
 /////////////////////////////////////////////////////////////
 // Depthbuffer
 /////////////////////////////////////////////////////////////

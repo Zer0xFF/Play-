@@ -185,6 +185,7 @@ void CVif::SetRegister(uint32 address, uint32 value)
 			{
 				// TODO: We need to properly handle this!
 				// But I lack games which leverage it.
+				CLog::GetInstance().Warn(LOG_NAME, "TODO: handle `value & FBRST_FBK || value & FBRST_STP`.\r\n");
 				assert(0);
 			}
 			if(value & FBRST_STC)

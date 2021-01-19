@@ -14,6 +14,7 @@
 
 #include "InputProviderQtKey.h"
 #include "ScreenShotUtils.h"
+#include "gs/GSH_OpenGL/GSH_OpenGL.h"
 
 namespace Ui
 {
@@ -63,13 +64,15 @@ private:
 	struct LastOpenCommand
 	{
 		LastOpenCommand() = default;
-		LastOpenCommand(BootType type, fs::path path)
+		LastOpenCommand(BootType type, fs::path path, std::string serial = "")
 		    : type(type)
 		    , path(path)
+		    , serial(serial)
 		{
 		}
 		BootType type = BootType::CD;
 		fs::path path;
+		std::string serial;
 	};
 
 	void SetOutputWindowSize();
@@ -111,6 +114,8 @@ private:
 	Framework::CSignal<void()>::Connection m_OnExecutableChangeConnection;
 	CGSHandler::NewFrameEvent::Connection m_OnNewFrameConnection;
 	CScreenShotUtils::Connection m_screenShotCompleteConnection;
+
+	CGSH_OpenGL::NewShaderCapSignal::Connection m_onNewShaderCapConnection;
 
 #ifdef DEBUGGER_INCLUDED
 	std::unique_ptr<QtDebugger> m_debugger;

@@ -56,6 +56,8 @@ set(SHARED_UI_SRC_FILES
 	BootablesProcesses.h
 	TheGamesDbClient.cpp
 	TheGamesDbClient.h
+	ShaderCapDb.cpp
+	ShaderCapDb.h
 	StatsManager.cpp
 	StatsManager.h
 )

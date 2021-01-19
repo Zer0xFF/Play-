@@ -5,6 +5,7 @@
 #include "S3FileBrowser.h"
 #include "ui_shared/BootablesProcesses.h"
 #include "ui_shared/StatsManager.h"
+#include "ui_shared/ShaderCapDb.h"
 #include "QtUtils.h"
 
 #include "openglwindow.h"
@@ -220,6 +221,15 @@ void MainWindow::SetupGsHandler()
 		m_outputwindow->create();
 		ui->gridLayout->addWidget(container, 0, 0);
 		m_virtualMachine->CreateGSHandler(CGSH_OpenGLQt::GetFactoryFunction(m_outputwindow));
+		auto gsHandler = static_cast<CGSH_OpenGL *>(m_virtualMachine->GetGSHandler());
+
+		m_onNewShaderCapConnection = gsHandler->OnNewShaderCap.Connect([&](uint32 shaderCap){
+			if(m_lastOpenCommand.type == BootType::CD)
+			{
+				ShaderCapDb::CClient::GetInstance().RegisterShaderCap(m_lastOpenCommand.serial.c_str(), shaderCap);
+			}
+		});
+
 	}
 	}
 
@@ -374,7 +384,7 @@ void MainWindow::BootElf(fs::path filePath)
 {
 	m_virtualMachine->Pause();
 	m_virtualMachine->Reset();
-	m_virtualMachine->m_ee->m_os->BootFromFile(filePath);
+	m_virtualMachine->BootFromFile(filePath);
 #ifndef DEBUGGER_INCLUDED
 	m_virtualMachine->Resume();
 #endif
@@ -393,12 +403,33 @@ void MainWindow::LoadCDROM(fs::path filePath)
 	m_lastPath = filePath.parent_path();
 	CAppConfig::GetInstance().SetPreferencePath(PREF_PS2_CDROM0_PATH, filePath);
 }
+#include "DiskUtils.h"
 
 void MainWindow::BootCDROM()
 {
+	std::string serial;
 	m_virtualMachine->Pause();
 	m_virtualMachine->Reset();
-	m_virtualMachine->m_ee->m_os->BootFromCDROM();
+	{
+		if(CAppConfig::GetInstance().GetPreferenceInteger(PREF_VIDEO_GS_HANDLER) == SettingsDialog::GS_HANDLERS::OPENGL)
+		{
+			auto filePath = CAppConfig::GetInstance().GetPreferencePath(PREF_PS2_CDROM0_PATH);
+			if(DiskUtils::TryGetDiskId(filePath, &serial))
+			{
+				auto gsHandler = static_cast<CGSH_OpenGL *>(m_virtualMachine->GetGSHandler());
+				auto caps = ShaderCapDb::CClient::GetInstance().GetShaderCaps(serial.c_str());
+				std::vector<uint32> shaderCaps;
+				for(auto cap : caps)
+				{
+					shaderCaps.push_back(cap.shaderCap);
+					fprintf(stdout, "loading caps: %d %s\n", cap.shaderCap, serial.c_str());
+				}
+				gsHandler->LoadShaderCap(shaderCaps);
+			}
+			// gsHandler
+		}
+	}
+	m_virtualMachine->BootFromCDROM();
 #ifndef DEBUGGER_INCLUDED
 	m_virtualMachine->Resume();
 #endif
@@ -406,7 +437,7 @@ void MainWindow::BootCDROM()
 		auto filePath = CAppConfig::GetInstance().GetPreferencePath(PREF_PS2_CDROM0_PATH);
 		TryRegisterBootable(filePath);
 		TryUpdateLastBootedTime(filePath);
-		m_lastOpenCommand = LastOpenCommand(BootType::CD, filePath);
+		m_lastOpenCommand = LastOpenCommand(BootType::CD, filePath, serial);
 		UpdateUI();
 	}
 	m_msgLabel->setText(QString("Loaded executable '%1' from cdrom0.")

@@ -76,6 +76,8 @@ public:
 
 	CPU_UTILISATION_INFO GetCpuUtilisationInfo() const;
 
+	void BootFromFile(const fs::path&);
+	void BootFromCDROM();
 #ifdef DEBUGGER_INCLUDED
 	std::string MakeDebugTagsPackagePath(const char*);
 	void LoadDebugTags(const char*);

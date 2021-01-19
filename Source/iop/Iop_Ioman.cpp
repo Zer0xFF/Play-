@@ -358,7 +358,7 @@ int32 CIoman::Dopen(const char* path)
 	}
 	catch(const std::exception& except)
 	{
-		CLog::GetInstance().Warn(LOG_NAME, "%s: Error occured while trying to open directory : %s\r\n", __FUNCTION__, except.what());
+		CLog::GetInstance().Warn(LOG_NAME, "%s: Error occured while trying to open directory : %s : %s\r\n", __FUNCTION__, except.what(), path);
 	}
 	return handle;
 }

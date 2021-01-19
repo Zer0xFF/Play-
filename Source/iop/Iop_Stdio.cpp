@@ -50,6 +50,9 @@ void CStdio::Invoke(CMIPS& context, unsigned int functionId)
 		context.m_State.nGPR[CMIPS::V0].nD0 = __puts(
 		    context.m_State.nGPR[CMIPS::A0].nV0);
 		break;
+	case 9:
+		__fdprintf(context);
+		break;
 	default:
 		CLog::GetInstance().Warn(LOG_NAME, "Unknown function (%d) called. PC = (%08X).\r\n",
 		                         functionId, context.m_State.nPC);
@@ -157,6 +160,15 @@ std::string CStdio::PrintFormatted(const char* format, CArgumentIterator& args)
 		}
 	}
 	return output;
+}
+
+void CStdio::__fdprintf(CMIPS& context)
+{
+	CCallArgumentIterator args(context);
+	auto fd = reinterpret_cast<int>(m_ram + args.GetNext());
+	auto format = reinterpret_cast<const char*>(m_ram + args.GetNext());
+	auto output = PrintFormatted(format, args);
+	m_ioman.Write(fd, output.length(), output.c_str());
 }
 
 void CStdio::__printf(CMIPS& context)

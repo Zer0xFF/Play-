@@ -77,7 +77,7 @@ Framework::OpenGl::ProgramPtr CGSH_OpenGL::GenerateShader(const SHADERCAPS& caps
 
 	FRAMEWORK_MAYBE_UNUSED bool linkResult = result->Link();
 	assert(linkResult);
-
+	printf("test: %d\n", linkResult);
 	CHECKGLERROR();
 
 	return result;

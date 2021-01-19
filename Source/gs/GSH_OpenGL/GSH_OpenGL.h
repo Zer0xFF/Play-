@@ -9,6 +9,7 @@
 #include "opengl/Program.h"
 #include "opengl/Shader.h"
 #include "opengl/Resource.h"
+#include "signal/Signal.h"
 
 #define PREF_CGSH_OPENGL_RESOLUTION_FACTOR "renderer.opengl.resfactor"
 #define PREF_CGSH_OPENGL_FORCEBILINEARTEXTURES "renderer.opengl.forcebilineartextures"
@@ -57,6 +58,11 @@ public:
 	const VERTEX* GetInputVertices() const;
 
 	Framework::CBitmap GetScreenshot() override;
+
+	const std::vector<uint32> GetShaderCaps();
+	void LoadShaderCap(std::vector<uint32>);
+	typedef Framework::CSignal<void(uint32)> NewShaderCapSignal;
+	NewShaderCapSignal OnNewShaderCap;
 
 protected:
 	void PalCache_Flush();
