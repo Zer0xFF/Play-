@@ -61,6 +61,7 @@ std::vector<ShaderCap> CClient::GetShaderCaps(const char* discId)
 void CClient::RegisterShaderCap(const char* discId, uint32_t shaderCap)
 {
 	Framework::CSqliteStatement statement(m_db, "INSERT OR IGNORE INTO shaderCap (shaderCap, discId) VALUES (?,?)");
+	sqlite3_bind_int64(statement, 1, shaderCap);
 	statement.BindUnsignedInteger(1, shaderCap);
 	statement.BindText(2, discId, true);
 	statement.StepNoResult();
