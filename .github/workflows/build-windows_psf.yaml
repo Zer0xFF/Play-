@@ -19,15 +19,15 @@ jobs:
       uses: microsoft/setup-msbuild@v1.0.2
     - name: Cache DirectX SDK
       uses: actions/cache@v2
-      id: cache
+      id: cache-directx
       with:
         path: DXSDK_Jun10.exe
         key: ${{ runner.os }}-DXSDK_Jun10
+    - name: Download DirectX SDK
+      if: steps.cache-directx.outputs.cache-hit != 'true'
+      run: curl -L --silent --show-error --output DXSDK_Jun10.exe https://madnation.net/uploads/8fe98/DXSDK_Jun10.exe
     - name: Install DirectX SDK
-      run: |
-        if not exist DXSDK_Jun10.exe curl -L --silent --show-error --output DXSDK_Jun10.exe https://madnation.net/uploads/8fe98/DXSDK_Jun10.exe
-        .\DXSDK_Jun10.exe /U
-      shell: cmd
+      run: .\DXSDK_Jun10.exe /U
     - name: Install OpenAL
       uses: crazy-max/ghaction-chocolatey@v1
       with:
