@@ -21,6 +21,11 @@ jobs:
       uses: crazy-max/ghaction-chocolatey@v1
       with:
         args: install -y openal openalsdk
+    - name: Install DirectX SDK
+      run: |
+        cd $RUNNER_WORKSPACE
+        curl -L --silent --show-error --output DXSDK_Jun10.exe https://archive.org/download/dxsdk_jun10/DXSDK_Jun10.exe
+        .\DXSDK_Jun10.exe /U
     - name: Checkout
       uses: actions/checkout@v2
       with:
