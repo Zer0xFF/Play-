@@ -1,0 +1,65 @@
+name: Build Windows
+
+on: [push, pull_request]
+
+jobs:
+  build_windows:
+    strategy:
+      matrix:
+        build-type: ['Visual Studio 16 2019']
+        target-platform: ['x64']
+        include: 
+          - target-platform: 'x64'
+            arch-type: 'x86_64'
+            qt-arch: 'win64_msvc2019_64'
+            installer-script: 'installer64.nsi'
+    runs-on: windows-latest
+    steps:
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+    - name: Install OpenAL
+      uses: crazy-max/ghaction-chocolatey@v1
+      with:
+        args: install -y openal openalsdk
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        fetch-depth: 0
+    - name: Set SHORT_HASH
+      run: echo "::set-output name=VALUE::${LONG_HASH:0:8}"
+      id: short_hash
+      env:
+        LONG_HASH: ${{ github.sha }}
+    - name: Generate CMake Project
+      run: |
+        mkdir build
+        cd build
+        cmake .. -G"${{ matrix.build-type }}" -A ${{ matrix.target-platform }} -T v141_xp -DBUILD_PLAY=off -DBUILD_TESTS=off -DBUILD_PSFPLAYER=on
+    - name: Build
+      run: |
+        cd build
+        cmake --build . --config Release
+    - name: Run Tests
+      run: |
+        cd build
+        ctest -C Release
+
+    - name: Prepare Installer Package
+      run: |
+        makensis.exe ./tools/PsfPlayer/installer_win32/${{ matrix.installer-script}}
+    - name: Upload a Build Artifact Installer
+      uses: actions/upload-artifact@v2
+      with:
+        name: Play_Windows_${{ matrix.target-platform }}_Installer
+        path: tools/PsfPlayer/installer_win32/*.exe
+    - name: Upload to S3
+      if: ${{ env.AWS_ACCESS_KEY_ID != null}}
+      run: |
+        aws s3 cp tools/PsfPlayer/installer_win32/*.exe s3://playbuilds/$SHORT_HASH/ --acl public-read
+      env:
+        ARCH_TYPE: ${{ matrix.arch-type }}
+        SHORT_HASH: ${{ steps.short_hash.outputs.VALUE }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: 'us-east-2'
