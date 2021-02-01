@@ -31,6 +31,7 @@ jobs:
       run: |
         if not exist DXSDK_Jun10.exe curl -L --silent --show-error --output DXSDK_Jun10.exe https://madnation.net/uploads/8fe98/DXSDK_Jun10.exe
         .\DXSDK_Jun10.exe /U
+      shell: powershell
     - name: Checkout
       uses: actions/checkout@v2
       with:
