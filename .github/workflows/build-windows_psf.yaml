@@ -6,11 +6,11 @@ jobs:
   build_windows:
     strategy:
       matrix:
-        build-type: 'Visual Studio 16 2019'
-        target-platform: 'x64'
-        arch-type: 'x86_64'
-        installer-script: 'installer64.nsi'
         aot-build: ['off', 'on']
+        build-type: ['Visual Studio 16 2019']
+        target-platform: ['x64']
+        arch-type: ['x86_64']
+        installer-script: ['installer64.nsi']
     runs-on: windows-latest
     steps:
     - name: Add msbuild to PATH
