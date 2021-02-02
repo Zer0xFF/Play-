@@ -21,17 +21,21 @@ jobs:
         submodules: recursive
         fetch-depth: 0
     - name: Cache DirectX SDK
+      if: ${{ matrix.aot-build == 'off' }}
       uses: actions/cache@v2
       id: cache-directx
       with:
         path: DXSDK_Jun10.exe
         key: ${{ runner.os }}-DXSDK_Jun10
     - name: Download DirectX SDK
+      if: ${{ matrix.aot-build == 'off' }}
       if: steps.cache-directx.outputs.cache-hit != 'true'
       run: curl -L --silent --show-error --output DXSDK_Jun10.exe https://madnation.net/uploads/8fe98/DXSDK_Jun10.exe
     - name: Install DirectX SDK
+      if: ${{ matrix.aot-build == 'off' }}
       run: cmd.exe /c start /wait .\DXSDK_Jun10.exe /U /O /F /S /P "${{ github.workspace }}\DX_SDK"
     - name: Install OpenAL
+      if: ${{ matrix.aot-build == 'off' }}
       uses: crazy-max/ghaction-chocolatey@v1
       with:
         args: install -y openalsdk
@@ -55,15 +59,21 @@ jobs:
       run: |
         cd build
         ctest -C Release
-
-    - name: Prepare Installer Package
-      run: |
-        makensis.exe ./tools/PsfPlayer/installer_win32/${{ matrix.installer-script }}
-    - name: Upload a Build Artifact Installer
+    - name: PsfPlayer Prepare Installer Package
+      if: ${{ matrix.aot-build == 'off' }}
+      run: makensis.exe ./tools/PsfPlayer/installer_win32/${{ matrix.installer-script }}
+    - name: Upload PsfPlayer Build Artifact Installer
+      if: ${{ matrix.aot-build == 'off' }}
       uses: actions/upload-artifact@v2
       with:
         name: PsfPlayer_Windows_${{ matrix.target-platform }}_Installer
         path: tools/PsfPlayer/installer_win32/*.exe
+    - name: Upload PsfAot Build Artifact Installer
+      if: ${{ matrix.aot-build == 'on' }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: PsfAot_Windows_${{ matrix.target-platform }}
+        path: build\tools\PsfPlayer\Source\ui_aot\Release\PsfAot.exe
     - name: Upload to S3
       if: ${{ env.AWS_ACCESS_KEY_ID != null}} && ${{ matrix.aot-build == 'off' }}
       run: |
