@@ -17,6 +17,11 @@ jobs:
     steps:
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        fetch-depth: 0
     - name: Cache DirectX SDK
       uses: actions/cache@v2
       id: cache-directx
@@ -32,11 +37,6 @@ jobs:
       uses: crazy-max/ghaction-chocolatey@v1
       with:
         args: install -y openal openalsdk
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-        submodules: recursive
-        fetch-depth: 0
     - name: Set SHORT_HASH
       run: echo "::set-output name=VALUE::${LONG_HASH:0:8}"
       id: short_hash
