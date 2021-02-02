@@ -74,7 +74,7 @@ jobs:
         name: PsfAot_Windows_${{ matrix.target-platform }}
         path: build\tools\PsfPlayer\Source\ui_aot\Release\PsfAot.exe
     - name: Upload to S3
-      if: ${{ env.AWS_ACCESS_KEY_ID != null}} && ${{ matrix.aot-build == 'off' }}
+      if: ${{ env.AWS_ACCESS_KEY_ID != null && matrix.aot-build == 'off' }}
       run: |
         aws s3 cp tools/PsfPlayer/installer_win32/*.exe s3://playbuilds/$SHORT_HASH/ --acl public-read
       env:
