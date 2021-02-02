@@ -58,7 +58,20 @@ if(BUILD_PLAY)
 		endif(TARGET_PLATFORM_IOS)
 
 		if(TARGET_PLATFORM_ANDROID)
-			add_subdirectory(Source/ui_android/)
+			if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/build_android/prebuilt/${ANDROID_ABI}/libPlay.so")
+				message("Using Prebuilt Library")
+				file(MAKE_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+				add_library(PlayPrebuilt SHARED IMPORTED)
+				set_property(TARGET PlayPrebuilt PROPERTY IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/build_android/prebuilt/${ANDROID_ABI}/libPlay.so")
+
+				add_custom_target(Play DEPENDS PlayPrebuilt)
+				add_custom_command(TARGET Play POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
+					"${CMAKE_CURRENT_SOURCE_DIR}/build_android/prebuilt/${ANDROID_ABI}/libPlay.so"
+					${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+				)
+			else()
+				add_subdirectory(Source/ui_android/)
+			endif()
 		endif(TARGET_PLATFORM_ANDROID)
 	endif()
 endif(BUILD_PLAY)
