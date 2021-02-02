@@ -36,7 +36,7 @@ jobs:
     - name: Install OpenAL
       uses: crazy-max/ghaction-chocolatey@v1
       with:
-        args: install -y openal openalsdk
+        args: install -y openalsdk
     - name: Set SHORT_HASH
       run: echo "::set-output name=VALUE::${LONG_HASH:0:8}"
       id: short_hash
