@@ -27,7 +27,7 @@ jobs:
       if: steps.cache-directx.outputs.cache-hit != 'true'
       run: curl -L --silent --show-error --output DXSDK_Jun10.exe https://madnation.net/uploads/8fe98/DXSDK_Jun10.exe
     - name: Install DirectX SDK
-      run: .\DXSDK_Jun10.exe /U /O /F /S /P "${{ github.workspace }}\DX_SDK"
+      run: cmd.exe /c start /wait .\DXSDK_Jun10.exe /U /O /F /S /P "${{ github.workspace }}\DX_SDK"
     - name: Install OpenAL
       uses: crazy-max/ghaction-chocolatey@v1
       with:
