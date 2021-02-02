@@ -64,7 +64,7 @@ jobs:
     - name: Upload a Build Artifact Installer
       uses: actions/upload-artifact@v2
       with:
-        name: Play_Windows_${{ matrix.target-platform }}_Installer
+        name: PsfPlayer_Windows_${{ matrix.target-platform }}_Installer
         path: tools/PsfPlayer/installer_win32/*.exe
     - name: Upload to S3
       if: ${{ env.AWS_ACCESS_KEY_ID != null}}
