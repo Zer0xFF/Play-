@@ -28,8 +28,7 @@ jobs:
         path: DXSDK_Jun10.exe
         key: ${{ runner.os }}-DXSDK_Jun10
     - name: Download DirectX SDK
-      if: ${{ matrix.aot-build == 'off' }}
-      if: steps.cache-directx.outputs.cache-hit != 'true'
+      if: ${{ matrix.aot-build == 'off' }} && steps.cache-directx.outputs.cache-hit != 'true'
       run: curl -L --silent --show-error --output DXSDK_Jun10.exe https://madnation.net/uploads/8fe98/DXSDK_Jun10.exe
     - name: Install DirectX SDK
       if: ${{ matrix.aot-build == 'off' }}
