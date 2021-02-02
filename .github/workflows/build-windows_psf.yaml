@@ -6,13 +6,11 @@ jobs:
   build_windows:
     strategy:
       matrix:
-        build-type: ['Visual Studio 16 2019']
-        target-platform: ['x64']
-        include: 
-          - target-platform: 'x64'
-            arch-type: 'x86_64'
-            qt-arch: 'win64_msvc2019_64'
-            installer-script: 'installer64.nsi'
+        build-type: 'Visual Studio 16 2019'
+        target-platform: 'x64'
+        arch-type: 'x86_64'
+        installer-script: 'installer64.nsi'
+        aot-build: ['off', 'on']
     runs-on: windows-latest
     steps:
     - name: Add msbuild to PATH
@@ -46,7 +44,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake .. -G"${{ matrix.build-type }}" -A ${{ matrix.target-platform }} -T v141_xp -DBUILD_PLAY=off -DBUILD_TESTS=off -DBUILD_PSFPLAYER=on
+        cmake .. -G"${{ matrix.build-type }}" -A ${{ matrix.target-platform }} -T v141_xp -DBUILD_PLAY=off -DBUILD_TESTS=off -DBUILD_PSFPLAYER=on -DBUILD_AOT_CACHE=${{ matrix.aot-build }}
       env:
         DXSDK_DIR: '${{ github.workspace }}\DX_SDK'
     - name: Build
@@ -60,14 +58,14 @@ jobs:
 
     - name: Prepare Installer Package
       run: |
-        makensis.exe ./tools/PsfPlayer/installer_win32/${{ matrix.installer-script}}
+        makensis.exe ./tools/PsfPlayer/installer_win32/${{ matrix.installer-script }}
     - name: Upload a Build Artifact Installer
       uses: actions/upload-artifact@v2
       with:
         name: PsfPlayer_Windows_${{ matrix.target-platform }}_Installer
         path: tools/PsfPlayer/installer_win32/*.exe
     - name: Upload to S3
-      if: ${{ env.AWS_ACCESS_KEY_ID != null}}
+      if: ${{ env.AWS_ACCESS_KEY_ID != null}} && ${{ matrix.aot-build == 'off' }}
       run: |
         aws s3 cp tools/PsfPlayer/installer_win32/*.exe s3://playbuilds/$SHORT_HASH/ --acl public-read
       env:
