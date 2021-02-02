@@ -48,7 +48,7 @@ jobs:
         cd build
         cmake .. -G"${{ matrix.build-type }}" -A ${{ matrix.target-platform }} -T v141_xp -DBUILD_PLAY=off -DBUILD_TESTS=off -DBUILD_PSFPLAYER=on
       env:
-        DXSDK_DIR: '${{ github.workspace }}/DX_SDK'
+        DXSDK_DIR: '${{ github.workspace }}\DX_SDK'
     - name: Build
       run: |
         cd build
