@@ -28,6 +28,12 @@ jobs:
       id: short_hash
       env:
         LONG_HASH: ${{ github.sha }}
+    - name: Set SHORT_HASHtest
+      run: |
+        echo ${{ env.SHORT_HASH }}
+      id: shorts_hash2
+      env:
+        SHORT_HASH: ${{ steps.short_hash.outputs.VALUE }}
     - name: Cache Qt
       id: cache-qt
       uses: actions/cache@v1
