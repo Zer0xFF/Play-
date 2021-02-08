@@ -21,6 +21,13 @@ jobs:
             installer-script: 'installer32.nsi'
     runs-on: windows-latest
     steps:
+    - name: Set SHORT_HASH
+      run: |
+        $short_hash = "${{ env.LONG_HASH }}".substring(0, 8)
+        echo "::set-output name=VALUE::$short_hash"
+      id: short_hash
+      env:
+        LONG_HASH: ${{ github.sha }}
     - name: Cache Qt
       id: cache-qt
       uses: actions/cache@v1
@@ -59,13 +66,6 @@ jobs:
         version: ${{ env.QT_VERSION }}
         arch: ${{ matrix.qt-arch }}
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
-    - name: Set SHORT_HASH
-      run: |
-        $short_hash = "${{ env.LONG_HASH }}".substring(0, 8)
-        echo "::set-output name=VALUE::$short_hash"
-      id: short_hash
-      env:
-        LONG_HASH: ${{ github.sha }}
     - name: Generate CMake Project
       run: |
         mkdir build

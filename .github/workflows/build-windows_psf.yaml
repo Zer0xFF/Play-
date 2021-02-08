@@ -13,6 +13,13 @@ jobs:
         installer-script: ['installer64.nsi']
     runs-on: windows-latest
     steps:
+    - name: Set SHORT_HASH
+      run: |
+        $short_hash = "${{ env.LONG_HASH }}".substring(0, 8)
+        echo "::set-output name=VALUE::$short_hash"
+      id: short_hash
+      env:
+        LONG_HASH: ${{ github.sha }}
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
     - name: Checkout
@@ -40,13 +47,6 @@ jobs:
       uses: crazy-max/ghaction-chocolatey@v1
       with:
         args: install -y openalsdk
-    - name: Set SHORT_HASH
-      run: |
-        $short_hash = "${{ env.LONG_HASH }}".substring(0, 8)
-        echo "::set-output name=VALUE::$short_hash"
-      id: short_hash
-      env:
-        LONG_HASH: ${{ github.sha }}
     - name: Generate CMake Project
       run: |
         mkdir build
