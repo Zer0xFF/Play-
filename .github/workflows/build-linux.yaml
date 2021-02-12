@@ -1,6 +1,8 @@
 name: Build Linux
 
 on: [push, pull_request]
+env:
+  VULKAN_SDK_VERSION: '1.2.162.0'
 jobs:
   build_linux:
     runs-on: ubuntu-16.04
@@ -11,14 +13,19 @@ jobs:
       with:
         path: ../Qt
         key: ${{ runner.os }}-QtCache
+    - name: Cache Vulkan SDK
+      uses: actions/cache@v2
+      id: cache-vulkansdk
+      with:
+        path: vulkansdk.tar.gz
+        key: ${{ runner.os }}-VulkanSDK-${ VULKAN_SDK_VERSION }
     - name: Install Vulkan SDK
+      if: steps.cache-vulkansdk.outputs.cache-hit != 'true'
       run: |
         cd $RUNNER_WORKSPACE
         wget -q -O vulkansdk.tar.gz https://sdk.lunarg.com/sdk/download/${VULKAN_SDK_VERSION}/linux/vulkansdk-linux-x86_64-${VULKAN_SDK_VERSION}.tar.gz?Human=true
         tar -zxf vulkansdk.tar.gz
         echo "VULKAN_SDK=$(pwd)/${VULKAN_SDK_VERSION}/x86_64" >> $GITHUB_ENV
-      env:
-        VULKAN_SDK_VERSION: '1.2.162.0'
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:

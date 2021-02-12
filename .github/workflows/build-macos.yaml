@@ -11,7 +11,14 @@ jobs:
       with:
         path: ../Qt
         key: ${{ runner.os }}-QtCache
+    - name: Cache Vulkan SDK
+      uses: actions/cache@v2
+      id: cache-vulkansdk
+      with:
+        path: vulkansdk.dmg
+        key: ${{ runner.os }}-VulkanSDK-${ VULKAN_SDK_VERSION }
     - name: Install Vulkan SDK
+      if: steps.cache-vulkansdk.outputs.cache-hit != 'true'
       run: |
         cd $RUNNER_WORKSPACE
         curl -L --show-error --output vulkansdk.dmg https://sdk.lunarg.com/sdk/download/${VULKAN_SDK_VERSION}/mac/vulkansdk-macos-${VULKAN_SDK_VERSION}.dmg?Human=true
