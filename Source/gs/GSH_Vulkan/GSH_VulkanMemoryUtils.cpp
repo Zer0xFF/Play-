@@ -53,25 +53,46 @@ Nuanceur::CUintRvalue CMemoryUtils::Memory_Read4(Nuanceur::CShaderBuilder& b, Nu
 void CMemoryUtils::Memory_Write32(Nuanceur::CShaderBuilder& b, Nuanceur::CArrayUintValue memoryBuffer, Nuanceur::CIntValue address, Nuanceur::CUintValue value)
 {
 	auto wordAddress = address / NewInt(b, 4);
-	Store(memoryBuffer, wordAddress, value);
+	Store(memoryBuffer, wordAddress, value, 32);
 }
 
 void CMemoryUtils::Memory_Write24(Nuanceur::CShaderBuilder& b, Nuanceur::CArrayUintValue memoryBuffer, Nuanceur::CIntValue address, Nuanceur::CUintValue value)
 {
 	auto wordAddress = address / NewInt(b, 4);
 	auto mask = NewUint(b, 0xFF000000);
-	AtomicAnd(memoryBuffer, wordAddress, mask);
-	AtomicOr(memoryBuffer, wordAddress, value);
+	#if 1
+		AtomicAnd(memoryBuffer, wordAddress, mask);
+		AtomicOr(memoryBuffer, wordAddress, value);
+	#else
+		auto pixel = (Load(memoryBuffer, wordAddress) & mask) | value;
+		Store(memoryBuffer, wordAddress, pixel, 24);
+	#endif
 }
 
 void CMemoryUtils::Memory_Write16(Nuanceur::CShaderBuilder& b, Nuanceur::CArrayUintValue memoryBuffer, Nuanceur::CIntValue address, Nuanceur::CUintValue value)
 {
-	auto wordAddress = address / NewInt(b, 4);
+	auto wordAddress =  (address +  NewInt(b, 0)) / NewInt(b, 4);
 	auto shiftAmount = (ToUint(address) & NewUint(b, 2)) * NewUint(b, 8);
 	auto mask = NewUint(b, 0xFFFFFFFF) ^ (NewUint(b, 0xFFFF) << shiftAmount);
 	auto valueWord = value << shiftAmount;
-	AtomicAnd(memoryBuffer, wordAddress, mask);
-	AtomicOr(memoryBuffer, wordAddress, valueWord);
+	#if 1
+		AtomicAnd(memoryBuffer, wordAddress, mask);
+		AtomicOr(memoryBuffer, wordAddress, valueWord);
+	#elif 1
+		auto pixel = (Load(memoryBuffer, wordAddress) & mask) | valueWord;
+		Store(memoryBuffer, wordAddress, pixel, 32);
+	#else
+		auto pixel = (Load(memoryBuffer, wordAddress)) | value;
+
+			// auto pixelLo = pixel & NewUint(b, 0xFF);
+			// auto pixelHi = (pixel >> NewUint(b, 8)) & NewUint(b, 0xFF);
+			// // auto clutIndexLo = clutIndex;
+			// // auto clutIndexHi = clutIndex + NewInt(b, 0x100);
+			// Store(memoryBuffer, wordAddress, pixelLo, 8);
+			// Store(memoryBuffer, wordAddress +  NewInt(b, 1), pixelHi, 8);
+
+		Store(memoryBuffer, wordAddress, pixel, 16);
+	#endif
 }
 
 void CMemoryUtils::Memory_Write8(Nuanceur::CShaderBuilder& b, Nuanceur::CArrayUintValue memoryBuffer, Nuanceur::CIntValue address, Nuanceur::CUintValue value)
@@ -80,8 +101,16 @@ void CMemoryUtils::Memory_Write8(Nuanceur::CShaderBuilder& b, Nuanceur::CArrayUi
 	auto shiftAmount = (ToUint(address) & NewUint(b, 3)) * NewUint(b, 8);
 	auto mask = NewUint(b, 0xFFFFFFFF) ^ (NewUint(b, 0xFF) << shiftAmount);
 	auto valueWord = value << shiftAmount;
-	AtomicAnd(memoryBuffer, wordAddress, mask);
-	AtomicOr(memoryBuffer, wordAddress, valueWord);
+	#if 0
+		AtomicAnd(memoryBuffer, wordAddress, mask);
+		AtomicOr(memoryBuffer, wordAddress, valueWord);
+	#elif 0
+		auto pixel = (Load(memoryBuffer, wordAddress) & mask) | valueWord;
+		Store(memoryBuffer, wordAddress, pixel, 32);
+	#else
+		// Store(memoryBuffer, (wordAddress * NewInt(b, 2)) + (ToInt(shiftAmount) * NewInt(b, 4)), value, 8);
+		Store(memoryBuffer, wordAddress, value, 8);
+	#endif
 }
 
 void CMemoryUtils::Memory_Write4(Nuanceur::CShaderBuilder& b, Nuanceur::CArrayUintValue memoryBuffer, Nuanceur::CIntValue nibAddress, Nuanceur::CUintValue value)
@@ -90,8 +119,16 @@ void CMemoryUtils::Memory_Write4(Nuanceur::CShaderBuilder& b, Nuanceur::CArrayUi
 	auto shiftAmount = (ToUint(nibAddress) & NewUint(b, 7)) * NewUint(b, 4);
 	auto mask = NewUint(b, 0xFFFFFFFF) ^ (NewUint(b, 0xF) << shiftAmount);
 	auto valueWord = value << shiftAmount;
-	AtomicAnd(memoryBuffer, wordAddress, mask);
-	AtomicOr(memoryBuffer, wordAddress, valueWord);
+	#if 1
+		AtomicAnd(memoryBuffer, wordAddress, mask);
+		AtomicOr(memoryBuffer, wordAddress, valueWord);
+	#elif 01
+		auto pixel = (Load(memoryBuffer, wordAddress) & mask) | valueWord;
+		Store(memoryBuffer, wordAddress, pixel, 32);
+	#else
+		auto pixel = (Load(memoryBuffer, wordAddress) & mask) | valueWord;
+		Store(memoryBuffer, wordAddress, pixel, 4);
+	#endif
 }
 
 Nuanceur::CFloat4Rvalue CMemoryUtils::PSM32ToVec4(Nuanceur::CShaderBuilder& b, Nuanceur::CUintValue inputColor)

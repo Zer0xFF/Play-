@@ -153,6 +153,7 @@ Framework::Vulkan::CShaderModule CTransferLocal::CreateShader(const PIPELINE_CAP
 	{
 		auto inputInvocationId = CInt4Lvalue(b.CreateInputInt(Nuanceur::SEMANTIC_SYSTEM_GIID));
 		auto memoryBuffer = CArrayUintValue(b.CreateUniformArrayUint("memoryBuffer", DESCRIPTOR_LOCATION_MEMORY));
+		auto memoryBuffer8 = CArrayUintValue(b.CreateUniformArrayUint8("memoryBuffer8", DESCRIPTOR_LOCATION_MEMORY));
 		auto srcSwizzleTable = CImageUint2DValue(b.CreateImage2DUint(DESCRIPTOR_LOCATION_SWIZZLETABLE_SRC));
 		auto dstSwizzleTable = CImageUint2DValue(b.CreateImage2DUint(DESCRIPTOR_LOCATION_SWIZZLETABLE_DST));
 
@@ -233,9 +234,11 @@ Framework::Vulkan::CShaderModule CTransferLocal::CreateShader(const PIPELINE_CAP
 		break;
 		case CGSHandler::PSMT8:
 		{
-			auto address = CMemoryUtils::GetPixelAddress<CGsPixelFormats::STORAGEPSMT8>(
-			    b, dstSwizzleTable, dstBufAddress, dstBufWidth, dstPos);
-			CMemoryUtils::Memory_Write8(b, memoryBuffer, address, pixel);
+			// auto address = CMemoryUtils::GetPixelAddress<CGsPixelFormats::STORAGEPSMT8>(
+			//     b, dstSwizzleTable, dstBufAddress, dstBufWidth, dstPos);
+			auto input = NewUint(b, 41);
+			auto address = NewInt(b, 4);
+			CMemoryUtils::Memory_Write8(b, memoryBuffer8, address, input);
 		}
 		break;
 		default:

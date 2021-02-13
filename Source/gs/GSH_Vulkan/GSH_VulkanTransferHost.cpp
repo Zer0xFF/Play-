@@ -224,26 +224,34 @@ Framework::Vulkan::CShaderModule CTransferHost::CreateXferShader(const PIPELINE_
 	{
 		auto inputInvocationId = CInt4Lvalue(b.CreateInputInt(Nuanceur::SEMANTIC_SYSTEM_GIID));
 		auto memoryBuffer = CArrayUintValue(b.CreateUniformArrayUint("memoryBuffer", DESCRIPTOR_LOCATION_MEMORY));
+		auto memoryBuffer8 = CArrayUintValue(b.CreateUniformArrayUint8("memoryBuffer8", DESCRIPTOR_LOCATION_MEMORY));
 		auto xferBuffer = CArrayUintValue(b.CreateUniformArrayUint("xferBuffer", DESCRIPTOR_LOCATION_XFERBUFFER));
 		auto dstSwizzleTable = CImageUint2DValue(b.CreateImage2DUint(DESCRIPTOR_LOCATION_SWIZZLETABLE_DST));
 
 		auto xferParams0 = CInt4Lvalue(b.CreateUniformInt4("xferParams0", Nuanceur::UNIFORM_UNIT_PUSHCONSTANT));
 		auto xferParams1 = CInt4Lvalue(b.CreateUniformInt4("xferParams1", Nuanceur::UNIFORM_UNIT_PUSHCONSTANT));
 
+
 		auto bufAddress = xferParams0->x();
-		auto bufWidth = xferParams0->y();
+		CIntValue bufWidth = xferParams0->y();
+#if 0
+		CIntValue pixelIndex = ((i % bufWidth) * (bufWidth1 + NewInt(b, 1))) + (i / bufWidth);
+#else
+		CIntValue pixelIndex = inputInvocationId->x();
+#endif
+		auto pixelCount = xferParams1->y();
+
 		auto rrw = xferParams0->z();
 		auto dsax = xferParams0->w();
 		auto dsay = xferParams1->x();
-		auto pixelCount = xferParams1->y();
 
-		auto rrx = inputInvocationId->x() % rrw;
-		auto rry = inputInvocationId->x() / rrw;
+		auto rrx = pixelIndex % rrw;
+		auto rry = pixelIndex / rrw;
 
 		auto trxX = (rrx + dsax) % NewInt(b, 2048);
 		auto trxY = (rry + dsay) % NewInt(b, 2048);
 
-		auto pixelIndex = inputInvocationId->x();
+
 
 		BeginIf(b, pixelIndex >= pixelCount);
 		{
@@ -280,10 +288,12 @@ Framework::Vulkan::CShaderModule CTransferHost::CreateXferShader(const PIPELINE_
 		break;
 		case CGSHandler::PSMT8:
 		{
-			auto input = XferStream_Read8(b, xferBuffer, pixelIndex);
-			auto address = CMemoryUtils::GetPixelAddress<CGsPixelFormats::STORAGEPSMT8>(
-			    b, dstSwizzleTable, bufAddress, bufWidth, NewInt2(trxX, trxY));
-			CMemoryUtils::Memory_Write8(b, memoryBuffer, address, input);
+			// auto input = XferStream_Read8(b, xferBuffer, pixelIndex);
+			// auto address = CMemoryUtils::GetPixelAddress<CGsPixelFormats::STORAGEPSMT8>(
+			//     b, dstSwizzleTable, bufAddress, bufWidth, NewInt2(trxX, trxY));
+			auto input = NewUint(b, 41);
+			auto address = NewInt(b, 4);
+			CMemoryUtils::Memory_Write8(b, memoryBuffer8, address, input);
 		}
 		break;
 		case CGSHandler::PSMT4:
@@ -296,10 +306,12 @@ Framework::Vulkan::CShaderModule CTransferHost::CreateXferShader(const PIPELINE_
 		break;
 		case CGSHandler::PSMT8H:
 		{
-			auto input = XferStream_Read8(b, xferBuffer, pixelIndex);
-			auto address = CMemoryUtils::GetPixelAddress<CGsPixelFormats::STORAGEPSMCT32>(
-			    b, dstSwizzleTable, bufAddress, bufWidth, NewInt2(trxX, trxY));
-			CMemoryUtils::Memory_Write8(b, memoryBuffer, address + NewInt(b, 3), input);
+			// auto input = XferStream_Read8(b, xferBuffer, pixelIndex);
+			// auto address = CMemoryUtils::GetPixelAddress<CGsPixelFormats::STORAGEPSMCT32>(
+			//     b, dstSwizzleTable, bufAddress, bufWidth, NewInt2(trxX, trxY));
+			auto input = NewUint(b, 41);
+			auto address = NewInt(b, 4);
+			CMemoryUtils::Memory_Write8(b, memoryBuffer8, address + NewInt(b, 3), input);
 		}
 		break;
 		case CGSHandler::PSMT4HL:
