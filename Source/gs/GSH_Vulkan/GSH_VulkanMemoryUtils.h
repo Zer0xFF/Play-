@@ -21,6 +21,19 @@ namespace GSH_Vulkan
 			return bufAddress + (pageNum * pageSize) + pageOffset;
 		}
 
+		template <typename StorageFormat>
+		static Nuanceur::CIntRvalue GetPixelAddress_Reverse(Nuanceur::CShaderBuilder& b, Nuanceur::CImageUint2DValue swizzleTable,
+		                                            Nuanceur::CIntValue bufAddress, Nuanceur::CIntValue bufWidth, Nuanceur::CInt2Value position)
+		{
+			auto pageWidth = NewInt(b, StorageFormat::PAGEWIDTH);
+			auto pageHeight = NewInt(b, StorageFormat::PAGEHEIGHT);
+			auto pageSize = NewInt(b, CGsPixelFormats::PAGESIZE);
+			auto pageNum = (position->x() / pageWidth) + ((position->y() / pageHeight) * bufWidth) / pageWidth;
+			auto pagePos = NewInt2(position->x() % pageWidth, position->y() % pageHeight);
+			auto pageOffset = ToInt(Load(swizzleTable, pagePos)->x());
+			return - (-bufAddress + (pageNum * pageSize) + pageOffset);
+		}
+
 		static Nuanceur::CIntRvalue GetPixelAddress_PSMT4(Nuanceur::CShaderBuilder&, Nuanceur::CImageUint2DValue, Nuanceur::CIntValue, Nuanceur::CIntValue, Nuanceur::CInt2Value);
 
 		static Nuanceur::CUintRvalue Memory_Read32(Nuanceur::CShaderBuilder&, Nuanceur::CArrayUintValue, Nuanceur::CIntValue);

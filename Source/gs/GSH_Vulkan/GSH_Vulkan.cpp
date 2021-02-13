@@ -361,8 +361,20 @@ void CGSH_Vulkan::CreateDevice(VkPhysicalDevice physicalDevice)
 	physicalDeviceFeatures2.pNext = &physicalDeviceFeaturesInvocationInterlock;
 	physicalDeviceFeatures2.features.fragmentStoresAndAtomics = VK_TRUE;
 
+
+	auto eight_bit = Framework::Vulkan::PhysicalDevice8BitStorageFeatures();
+	eight_bit.pNext = &physicalDeviceFeatures2;
+	eight_bit.storageBuffer8BitAccess = VK_TRUE;
+	eight_bit.uniformAndStorageBuffer8BitAccess = VK_TRUE;
+
+	auto features12 = Framework::Vulkan::PhysicalDeviceVulkan12Features();
+	features12.pNext = &eight_bit;
+	features12.storageBuffer8BitAccess = VK_TRUE;
+	features12.shaderInt8 = VK_TRUE;
+	features12.uniformAndStorageBuffer8BitAccess = VK_TRUE;
+
 	auto deviceCreateInfo = Framework::Vulkan::DeviceCreateInfo();
-	deviceCreateInfo.pNext = &physicalDeviceFeatures2;
+	deviceCreateInfo.pNext = &features12;
 	deviceCreateInfo.flags = 0;
 	deviceCreateInfo.enabledLayerCount = static_cast<uint32>(enabledLayers.size());
 	deviceCreateInfo.ppEnabledLayerNames = enabledLayers.data();

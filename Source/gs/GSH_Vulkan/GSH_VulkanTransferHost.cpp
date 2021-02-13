@@ -283,16 +283,16 @@ Framework::Vulkan::CShaderModule CTransferHost::CreateXferShader(const PIPELINE_
 			auto input = XferStream_Read16(b, xferBuffer, pixelIndex);
 			auto address = CMemoryUtils::GetPixelAddress<CGsPixelFormats::STORAGEPSMCT16>(
 			    b, dstSwizzleTable, bufAddress, bufWidth, NewInt2(trxX, trxY));
-			CMemoryUtils::Memory_Write16(b, memoryBuffer, address, input);
+			CMemoryUtils::Memory_Write16(b, memoryBuffer8, address, input);
 		}
 		break;
 		case CGSHandler::PSMT8:
 		{
-			// auto input = XferStream_Read8(b, xferBuffer, pixelIndex);
-			// auto address = CMemoryUtils::GetPixelAddress<CGsPixelFormats::STORAGEPSMT8>(
-			//     b, dstSwizzleTable, bufAddress, bufWidth, NewInt2(trxX, trxY));
-			auto input = NewUint(b, 41);
-			auto address = NewInt(b, 4);
+			auto input = XferStream_Read8(b, xferBuffer, pixelIndex);
+			auto address = CMemoryUtils::GetPixelAddress<CGsPixelFormats::STORAGEPSMT8>(
+			    b, dstSwizzleTable, bufAddress, bufWidth, NewInt2(trxX, trxY));
+			// auto input = NewUint(b, 41);
+			// auto address = NewInt(b, 4);
 			CMemoryUtils::Memory_Write8(b, memoryBuffer8, address, input);
 		}
 		break;
@@ -306,11 +306,11 @@ Framework::Vulkan::CShaderModule CTransferHost::CreateXferShader(const PIPELINE_
 		break;
 		case CGSHandler::PSMT8H:
 		{
-			// auto input = XferStream_Read8(b, xferBuffer, pixelIndex);
-			// auto address = CMemoryUtils::GetPixelAddress<CGsPixelFormats::STORAGEPSMCT32>(
-			//     b, dstSwizzleTable, bufAddress, bufWidth, NewInt2(trxX, trxY));
-			auto input = NewUint(b, 41);
-			auto address = NewInt(b, 4);
+			auto input = XferStream_Read8(b, xferBuffer, pixelIndex);
+			auto address = CMemoryUtils::GetPixelAddress<CGsPixelFormats::STORAGEPSMCT32>(
+			    b, dstSwizzleTable, bufAddress, bufWidth, NewInt2(trxX, trxY));
+			// auto input = NewUint(b, 41);
+			// auto address = NewInt(b, 4);
 			CMemoryUtils::Memory_Write8(b, memoryBuffer8, address + NewInt(b, 3), input);
 		}
 		break;

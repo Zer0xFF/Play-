@@ -75,14 +75,14 @@ void CMemoryUtils::Memory_Write16(Nuanceur::CShaderBuilder& b, Nuanceur::CArrayU
 	auto shiftAmount = (ToUint(address) & NewUint(b, 2)) * NewUint(b, 8);
 	auto mask = NewUint(b, 0xFFFFFFFF) ^ (NewUint(b, 0xFFFF) << shiftAmount);
 	auto valueWord = value << shiftAmount;
-	#if 1
+	#if 0
 		AtomicAnd(memoryBuffer, wordAddress, mask);
 		AtomicOr(memoryBuffer, wordAddress, valueWord);
-	#elif 1
+	#elif 0
 		auto pixel = (Load(memoryBuffer, wordAddress) & mask) | valueWord;
 		Store(memoryBuffer, wordAddress, pixel, 32);
 	#else
-		auto pixel = (Load(memoryBuffer, wordAddress)) | value;
+		// auto pixel = (Load(memoryBuffer, wordAddress)) | value;
 
 			// auto pixelLo = pixel & NewUint(b, 0xFF);
 			// auto pixelHi = (pixel >> NewUint(b, 8)) & NewUint(b, 0xFF);
@@ -91,7 +91,7 @@ void CMemoryUtils::Memory_Write16(Nuanceur::CShaderBuilder& b, Nuanceur::CArrayU
 			// Store(memoryBuffer, wordAddress, pixelLo, 8);
 			// Store(memoryBuffer, wordAddress +  NewInt(b, 1), pixelHi, 8);
 
-		Store(memoryBuffer, wordAddress, pixel, 16);
+		Store(memoryBuffer, address, value, 16);
 	#endif
 }
 
@@ -109,7 +109,7 @@ void CMemoryUtils::Memory_Write8(Nuanceur::CShaderBuilder& b, Nuanceur::CArrayUi
 		Store(memoryBuffer, wordAddress, pixel, 32);
 	#else
 		// Store(memoryBuffer, (wordAddress * NewInt(b, 2)) + (ToInt(shiftAmount) * NewInt(b, 4)), value, 8);
-		Store(memoryBuffer, wordAddress, value, 8);
+		Store(memoryBuffer, address, value, 8);
 	#endif
 }
 
@@ -122,12 +122,12 @@ void CMemoryUtils::Memory_Write4(Nuanceur::CShaderBuilder& b, Nuanceur::CArrayUi
 	#if 1
 		AtomicAnd(memoryBuffer, wordAddress, mask);
 		AtomicOr(memoryBuffer, wordAddress, valueWord);
-	#elif 01
+	#elif 0
 		auto pixel = (Load(memoryBuffer, wordAddress) & mask) | valueWord;
 		Store(memoryBuffer, wordAddress, pixel, 32);
 	#else
-		auto pixel = (Load(memoryBuffer, wordAddress) & mask) | valueWord;
-		Store(memoryBuffer, wordAddress, pixel, 4);
+		// auto pixel = (Load(memoryBuffer, wordAddress) & mask) | valueWord;
+		Store(memoryBuffer, nibAddress * NewInt(b, 2), value, 4);
 	#endif
 }
 
