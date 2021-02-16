@@ -293,6 +293,11 @@ elseif(TARGET_PLATFORM_WIN32)
 		win32/InputProviderXInput.h
 	)
 	add_executable(Play WIN32 ${QT_SOURCES} ${QT_MOC_SRCS} ${QT_RES_SOURCES} ${QT_UI_HEADERS})
+	ADD_CUSTOM_COMMAND(
+		TARGET Play
+		POST_BUILD
+		COMMAND ${Qt5Core_DIR}/../../../bin/windeployqt.exe $<TARGET_FILE_DIR:Play> --no-system-d3d-compiler --no-quick-import --no-opengl-sw --no-compiler-runtime --no-translations
+	)
 elseif(TARGET_PLATFORM_UNIX)
 	add_executable(Play ${QT_SOURCES} ${QT_MOC_SRCS} ${QT_RES_SOURCES} ${QT_UI_HEADERS})
 
