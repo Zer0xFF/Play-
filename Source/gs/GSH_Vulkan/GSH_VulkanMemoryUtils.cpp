@@ -116,8 +116,6 @@ void CMemoryUtils::Memory_Write16(Nuanceur::CShaderBuilder& b, Nuanceur::CArrayU
 			Store(memoryBuffer, address, value, 8);
 			Store(memoryBuffer, address + NewInt(b, 1), value >> NewUint(b, 8), 8);
 		#else
-			// auto val = (value >> NewUint(b, 8)) | (value << NewUint(b, 8));
-
 			Store(memoryBuffer, address, value, 16);
 		#endif
 		
@@ -144,8 +142,6 @@ void CMemoryUtils::Memory_Write16_orig(Nuanceur::CShaderBuilder& b, Nuanceur::CA
 			Store(memoryBuffer, address, value, 8);
 			Store(memoryBuffer, address + NewInt(b, 1), value >> NewUint(b, 8), 8);
 		#else
-			// auto val = (value >> NewUint(b, 8)) | (value << NewUint(b, 8));
-
 			Store(memoryBuffer, address, value, 16);
 		#endif
 		
@@ -176,14 +172,11 @@ void CMemoryUtils::Memory_Write4(Nuanceur::CShaderBuilder& b, Nuanceur::CArrayUi
 	auto mask = NewUint(b, 0xFFFFFFFF) ^ (NewUint(b, 0xF) << shiftAmount);
 	auto valueWord = value << shiftAmount;
 	#if 1
-		// return;
 		AtomicAnd(memoryBuffer, wordAddress, mask);
 		AtomicOr(memoryBuffer, wordAddress, valueWord);
 	#elif 0
 		auto pixel = (Load(memoryBuffer, wordAddress) & mask) | valueWord;
 		Store(memoryBuffer, wordAddress, pixel, 32);
-	#else
-		Store(memoryBuffer, NewInt(b, 2), value, 4);
 	#endif
 }
 
