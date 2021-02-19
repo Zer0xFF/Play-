@@ -60,12 +60,39 @@ void CMemoryUtils::Memory_Write24(Nuanceur::CShaderBuilder& b, Nuanceur::CArrayU
 {
 	auto wordAddress = address / NewInt(b, 4);
 	auto mask = NewUint(b, 0xFF000000);
+	#if 0
+		AtomicAnd(memoryBuffer, wordAddress, mask);
+		AtomicOr(memoryBuffer, wordAddress, value);
+	#elif 0
+		auto pixel = (Load(memoryBuffer, wordAddress) & mask) | value;
+		Store(memoryBuffer, wordAddress, pixel, 24);
+	#elif 0
+		Store(memoryBuffer, address, value, 8);
+		Store(memoryBuffer, address + NewInt(b, 1), value >> NewUint(b, 8), 8);
+		Store(memoryBuffer, address + NewInt(b, 2), value >> NewUint(b, 16), 8);
+	#else
+		Store(memoryBuffer, address, value, 16);
+		Store(memoryBuffer, address + NewInt(b, 2), value >> NewUint(b, 16), 8);
+	#endif
+}
+
+void CMemoryUtils::Memory_Write24_orig(Nuanceur::CShaderBuilder& b, Nuanceur::CArrayUintValue memoryBuffer, Nuanceur::CIntValue address, Nuanceur::CUintValue value)
+{
+	auto wordAddress = address / NewInt(b, 4);
+	auto mask = NewUint(b, 0xFF000000);
 	#if 1
 		AtomicAnd(memoryBuffer, wordAddress, mask);
 		AtomicOr(memoryBuffer, wordAddress, value);
-	#else
+	#elif 0
 		auto pixel = (Load(memoryBuffer, wordAddress) & mask) | value;
 		Store(memoryBuffer, wordAddress, pixel, 24);
+	#elif 1
+		Store(memoryBuffer, address, value, 8);
+		Store(memoryBuffer, address + NewInt(b, 1), value >> NewUint(b, 8), 8);
+		Store(memoryBuffer, address + NewInt(b, 2), value >> NewUint(b, 16), 8);
+	#else
+		Store(memoryBuffer, address, value, 16);
+		Store(memoryBuffer, address + NewInt(b, 2), value >> NewUint(b, 16), 8);
 	#endif
 }
 
@@ -80,18 +107,48 @@ void CMemoryUtils::Memory_Write16(Nuanceur::CShaderBuilder& b, Nuanceur::CArrayU
 		AtomicOr(memoryBuffer, wordAddress, valueWord);
 	#elif 0
 		auto pixel = (Load(memoryBuffer, wordAddress) & mask) | valueWord;
-		Store(memoryBuffer, wordAddress, pixel, 32);
+		Store(memoryBuffer, address, pixel, 32);
 	#else
-		// auto pixel = (Load(memoryBuffer, wordAddress)) | value;
+		#if 0
+			Store(memoryBuffer, address + NewInt(b, 1), value, 8);
+			Store(memoryBuffer, address, value >> NewUint(b, 8), 8);
+		#elif 0
+			Store(memoryBuffer, address, value, 8);
+			Store(memoryBuffer, address + NewInt(b, 1), value >> NewUint(b, 8), 8);
+		#else
+			// auto val = (value >> NewUint(b, 8)) | (value << NewUint(b, 8));
 
-			// auto pixelLo = pixel & NewUint(b, 0xFF);
-			// auto pixelHi = (pixel >> NewUint(b, 8)) & NewUint(b, 0xFF);
-			// // auto clutIndexLo = clutIndex;
-			// // auto clutIndexHi = clutIndex + NewInt(b, 0x100);
-			// Store(memoryBuffer, wordAddress, pixelLo, 8);
-			// Store(memoryBuffer, wordAddress +  NewInt(b, 1), pixelHi, 8);
+			Store(memoryBuffer, address, value, 16);
+		#endif
+		
+	#endif
+}
 
-		Store(memoryBuffer, address, value, 16);
+void CMemoryUtils::Memory_Write16_orig(Nuanceur::CShaderBuilder& b, Nuanceur::CArrayUintValue memoryBuffer, Nuanceur::CIntValue address, Nuanceur::CUintValue value)
+{
+	auto wordAddress =  (address +  NewInt(b, 0)) / NewInt(b, 4);
+	auto shiftAmount = (ToUint(address) & NewUint(b, 2)) * NewUint(b, 8);
+	auto mask = NewUint(b, 0xFFFFFFFF) ^ (NewUint(b, 0xFFFF) << shiftAmount);
+	auto valueWord = value << shiftAmount;
+	#if 1
+		AtomicAnd(memoryBuffer, wordAddress, mask);
+		AtomicOr(memoryBuffer, wordAddress, valueWord);
+	#elif 0
+		auto pixel = (Load(memoryBuffer, wordAddress) & mask) | valueWord;
+		Store(memoryBuffer, address, pixel, 32);
+	#else
+		#if 0
+			Store(memoryBuffer, address + NewInt(b, 1), value, 8);
+			Store(memoryBuffer, address, value >> NewUint(b, 8), 8);
+		#elif 1
+			Store(memoryBuffer, address, value, 8);
+			Store(memoryBuffer, address + NewInt(b, 1), value >> NewUint(b, 8), 8);
+		#else
+			// auto val = (value >> NewUint(b, 8)) | (value << NewUint(b, 8));
+
+			Store(memoryBuffer, address, value, 16);
+		#endif
+		
 	#endif
 }
 
@@ -108,7 +165,6 @@ void CMemoryUtils::Memory_Write8(Nuanceur::CShaderBuilder& b, Nuanceur::CArrayUi
 		auto pixel = (Load(memoryBuffer, wordAddress) & mask) | valueWord;
 		Store(memoryBuffer, wordAddress, pixel, 32);
 	#else
-		// Store(memoryBuffer, (wordAddress * NewInt(b, 2)) + (ToInt(shiftAmount) * NewInt(b, 4)), value, 8);
 		Store(memoryBuffer, address, value, 8);
 	#endif
 }
@@ -120,14 +176,14 @@ void CMemoryUtils::Memory_Write4(Nuanceur::CShaderBuilder& b, Nuanceur::CArrayUi
 	auto mask = NewUint(b, 0xFFFFFFFF) ^ (NewUint(b, 0xF) << shiftAmount);
 	auto valueWord = value << shiftAmount;
 	#if 1
+		// return;
 		AtomicAnd(memoryBuffer, wordAddress, mask);
 		AtomicOr(memoryBuffer, wordAddress, valueWord);
 	#elif 0
 		auto pixel = (Load(memoryBuffer, wordAddress) & mask) | valueWord;
 		Store(memoryBuffer, wordAddress, pixel, 32);
 	#else
-		// auto pixel = (Load(memoryBuffer, wordAddress) & mask) | valueWord;
-		Store(memoryBuffer, nibAddress * NewInt(b, 2), value, 4);
+		Store(memoryBuffer, NewInt(b, 2), value, 4);
 	#endif
 }
 

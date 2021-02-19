@@ -371,6 +371,7 @@ void CGSH_Vulkan::CreateDevice(VkPhysicalDevice physicalDevice)
 	features12.pNext = &eight_bit;
 	features12.storageBuffer8BitAccess = VK_TRUE;
 	features12.shaderInt8 = VK_TRUE;
+	features12.shaderFloat16 = VK_TRUE;
 	features12.uniformAndStorageBuffer8BitAccess = VK_TRUE;
 
 	auto deviceCreateInfo = Framework::Vulkan::DeviceCreateInfo();

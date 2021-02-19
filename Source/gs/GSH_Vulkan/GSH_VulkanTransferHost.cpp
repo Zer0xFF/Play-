@@ -14,7 +14,12 @@ using namespace GSH_Vulkan;
 #define DESCRIPTOR_LOCATION_XFERBUFFER 1
 #define DESCRIPTOR_LOCATION_SWIZZLETABLE_DST 2
 
+#ifndef XY_WORKGROUP
 #define LOCAL_SIZE_X 1024
+#else
+#define LOCAL_SIZE_X 32
+#define LOCAL_SIZE_Y 32
+#endif
 
 CTransferHost::CTransferHost(const ContextPtr& context, const FrameCommandBufferPtr& frameCommandBuffer)
     : m_context(context)
@@ -98,7 +103,17 @@ void CTransferHost::DoTransfer(const XferBuffer& inputData)
 	}
 
 	Params.pixelCount = pixelCount;
-	uint32 workUnits = (pixelCount + LOCAL_SIZE_X - 1) / LOCAL_SIZE_X;
+
+
+#ifndef XY_WORKGROUP
+	// uint32 workUnits = (pixelCount + LOCAL_SIZE_X - 1) / LOCAL_SIZE_X;
+	// Works better when LOCAL_SIZE_X == 1
+	uint32 workUnits = (pixelCount / LOCAL_SIZE_X) + 1;
+#else
+	uint32 workUnitsX = (Params.rrw + LOCAL_SIZE_X - 1) / LOCAL_SIZE_X;
+	uint32 workUnitsY = ((pixelCount / Params.rrw) + LOCAL_SIZE_Y - 1) / LOCAL_SIZE_Y;
+#endif
+
 
 	auto descriptorSetCaps = make_convertible<DESCRIPTORSET_CAPS>(0);
 	descriptorSetCaps.dstPsm = m_pipelineCaps.dstFormat;
@@ -120,7 +135,11 @@ void CTransferHost::DoTransfer(const XferBuffer& inputData)
 	m_context->device.vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, xferPipeline->pipelineLayout, 0, 1, &descriptorSet, 1, &m_xferBufferOffset);
 	m_context->device.vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, xferPipeline->pipeline);
 	m_context->device.vkCmdPushConstants(commandBuffer, xferPipeline->pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(XFERPARAMS), &Params);
+#ifndef XY_WORKGROUP
 	m_context->device.vkCmdDispatch(commandBuffer, workUnits, 1, 1);
+#else
+	m_context->device.vkCmdDispatch(commandBuffer, workUnitsX, workUnitsY, 1);
+#endif
 
 	m_xferBufferOffset += inputData.size();
 }
@@ -220,7 +239,9 @@ Framework::Vulkan::CShaderModule CTransferHost::CreateXferShader(const PIPELINE_
 	auto b = CShaderBuilder();
 
 	b.SetMetadata(CShaderBuilder::METADATA_LOCALSIZE_X, LOCAL_SIZE_X);
-
+#ifdef XY_WORKGROUP
+	b.SetMetadata(CShaderBuilder::METADATA_LOCALSIZE_Y, LOCAL_SIZE_Y);
+#endif
 	{
 		auto inputInvocationId = CInt4Lvalue(b.CreateInputInt(Nuanceur::SEMANTIC_SYSTEM_GIID));
 		auto memoryBuffer = CArrayUintValue(b.CreateUniformArrayUint("memoryBuffer", DESCRIPTOR_LOCATION_MEMORY));
@@ -234,10 +255,13 @@ Framework::Vulkan::CShaderModule CTransferHost::CreateXferShader(const PIPELINE_
 
 		auto bufAddress = xferParams0->x();
 		CIntValue bufWidth = xferParams0->y();
-#if 0
+#if 1
+		CIntValue pixelIndex = inputInvocationId->x();
+#elif 0
 		CIntValue pixelIndex = ((i % bufWidth) * (bufWidth1 + NewInt(b, 1))) + (i / bufWidth);
 #else
-		CIntValue pixelIndex = inputInvocationId->x();
+		// testing to see if setting X, Y workgroup helps with performance when atomics are used
+		CIntValue pixelIndex = inputInvocationId->x() + (inputInvocationId->x() * inputInvocationId->y());
 #endif
 		auto pixelCount = xferParams1->y();
 
@@ -275,7 +299,7 @@ Framework::Vulkan::CShaderModule CTransferHost::CreateXferShader(const PIPELINE_
 			auto input = XferStream_Read24(b, xferBuffer, pixelIndex);
 			auto address = CMemoryUtils::GetPixelAddress<CGsPixelFormats::STORAGEPSMCT32>(
 			    b, dstSwizzleTable, bufAddress, bufWidth, NewInt2(trxX, trxY));
-			CMemoryUtils::Memory_Write24(b, memoryBuffer, address, input);
+			CMemoryUtils::Memory_Write24(b, memoryBuffer8, address, input);
 		}
 		break;
 		case CGSHandler::PSMCT16:
