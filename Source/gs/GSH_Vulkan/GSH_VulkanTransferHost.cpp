@@ -344,7 +344,7 @@ Framework::Vulkan::CShaderModule CTransferHost::CreateXferShader(const PIPELINE_
 			auto address = CMemoryUtils::GetPixelAddress<CGsPixelFormats::STORAGEPSMCT32>(
 			    b, dstSwizzleTable, bufAddress, bufWidth, NewInt2(trxX, trxY));
 			auto nibAddress = (address + NewInt(b, 3)) * NewInt(b, 2);
-			CMemoryUtils::Memory_Write4(b, memoryBuffer, nibAddress, input);
+			CMemoryUtils::Memory_Write8(b, memoryBuffer8, address + NewInt(b, 3), input);
 		}
 		break;
 		case CGSHandler::PSMT4HH:
@@ -353,7 +353,7 @@ Framework::Vulkan::CShaderModule CTransferHost::CreateXferShader(const PIPELINE_
 			auto address = CMemoryUtils::GetPixelAddress<CGsPixelFormats::STORAGEPSMCT32>(
 			    b, dstSwizzleTable, bufAddress, bufWidth, NewInt2(trxX, trxY));
 			auto nibAddress = ((address + NewInt(b, 3)) * NewInt(b, 2)) | NewInt(b, 1);
-			CMemoryUtils::Memory_Write4(b, memoryBuffer, nibAddress, input);
+			CMemoryUtils::Memory_Write8(b, memoryBuffer8, address + NewInt(b, 3), input << NewUint(b, 4));
 		}
 		break;
 		default:
