@@ -549,81 +549,90 @@ void convertColumn8(uint8* dest, const int destStride, uint8* src, int colNum)
 
 void CGSH_OpenGL::TexUpdater_Psm8(uint32 bufPtr, uint32 bufWidth, unsigned int texX, unsigned int texY, unsigned int texWidth, unsigned int texHeight)
 {
-	if(texWidth < 16)
-	{
-		// Widths are powers of 2, so anything over 16 will be an integral number of columns wide.
-		// Note: for small textures it still may be a win to do the SIMD swizzle and then cut out the sub-region to
-		// correct the row stride.
-		return CGSH_OpenGL::TexUpdater_Psm48<CGsPixelFormats::CPixelIndexorPSMT8>(bufPtr, bufWidth, texX, texY, texWidth, texHeight);
-	}
-
-	CGsPixelFormats::CPixelIndexorPSMT8 indexor(m_pRAM, bufPtr, bufWidth);
-	uint8* dst = m_pCvtBuffer;
-	for(unsigned int y = 0; y < texHeight; y += 16)
-	{
-		for(unsigned int x = 0; x < texWidth; x += 16)
+	#if defined(__EMSCRIPTEN__)
+		return CGSH_OpenGL::TexUpdater_Psm48<CGsPixelFormats::CPixelIndexorPSMT4>(bufPtr, bufWidth, texX, texY, texWidth, texHeight);
+	#else
+		if(texWidth < 16)
 		{
-			uint8* colDst = dst;
-			uint8* src = indexor.GetPixelAddress(texX + x, texY + y);
-
-			// process an entire 16x16 block.
-			// A column (64 bytes) is 16x4 pixels and they stack vertically in a block
-
-			int colNum = 0;
-			for(unsigned int coly = 0; coly < 16; coly += 4)
-			{
-				convertColumn8(colDst + x, texWidth, src, colNum++);
-				src += 64;
-				colDst += texWidth * 4;
-			}
+			// Widths are powers of 2, so anything over 16 will be an integral number of columns wide.
+			// Note: for small textures it still may be a win to do the SIMD swizzle and then cut out the sub-region to
+			// correct the row stride.
+			return CGSH_OpenGL::TexUpdater_Psm48<CGsPixelFormats::CPixelIndexorPSMT8>(bufPtr, bufWidth, texX, texY, texWidth, texHeight);
 		}
 
-		dst += texWidth * 16;
-	}
+		CGsPixelFormats::CPixelIndexorPSMT8 indexor(m_pRAM, bufPtr, bufWidth);
+		uint8* dst = m_pCvtBuffer;
+		for(unsigned int y = 0; y < texHeight; y += 16)
+		{
+			for(unsigned int x = 0; x < texWidth; x += 16)
+			{
+				uint8* colDst = dst;
+				uint8* src = indexor.GetPixelAddress(texX + x, texY + y);
 
-	glTexSubImage2D(GL_TEXTURE_2D, 0, texX, texY, texWidth, texHeight, GL_RED, GL_UNSIGNED_BYTE, m_pCvtBuffer);
-	CHECKGLERROR();
+				// process an entire 16x16 block.
+				// A column (64 bytes) is 16x4 pixels and they stack vertically in a block
+
+				int colNum = 0;
+				for(unsigned int coly = 0; coly < 16; coly += 4)
+				{
+					convertColumn8(colDst + x, texWidth, src, colNum++);
+					src += 64;
+					colDst += texWidth * 4;
+				}
+			}
+
+			dst += texWidth * 16;
+		}
+
+		glTexSubImage2D(GL_TEXTURE_2D, 0, texX, texY, texWidth, texHeight, GL_RED, GL_UNSIGNED_BYTE, m_pCvtBuffer);
+		CHECKGLERROR();
+	#endif
 }
 
 void CGSH_OpenGL::TexUpdater_Psm4(unsigned int bufPtr, unsigned int bufWidth, unsigned int texX, unsigned int texY, unsigned int texWidth, unsigned int texHeight)
 {
-	if(texWidth < 16)
-	{
-		// Widths are powers of 2, so anything over 32 will be an integral number of columns wide.
-		// 16 wide textures are dealt with as a special case in the SIMD code.
-		// Note: for small textures it still may be a win to do the SIMD swizzle and then cut out the sub-region to
-		// correct the row stride.
+	#if defined(__EMSCRIPTEN__)
 		return CGSH_OpenGL::TexUpdater_Psm48<CGsPixelFormats::CPixelIndexorPSMT4>(bufPtr, bufWidth, texX, texY, texWidth, texHeight);
-	}
+	#else
 
-	CGsPixelFormats::CPixelIndexorPSMT4 indexor(m_pRAM, bufPtr, bufWidth);
-
-	uint8* dst = m_pCvtBuffer;
-	for(unsigned int y = 0; y < texHeight; y += 16)
-	{
-		for(unsigned int x = 0; x < texWidth; x += 32)
+		if(texWidth < 16)
 		{
-			uint8* colDst = dst + x;
-			unsigned int nx = texX + x;
-			unsigned int ny = texY + y;
-			uint32 colAddr = indexor.GetColumnAddress(nx, ny);
-			uint8* src = m_pRAM + colAddr;
-
-			// process an entire 32x16 block.
-			// A column (64 bytes) is 32x4 pixels and they stack vertically in a block
-
-			for(unsigned int colNum = 0; colNum < 4; ++colNum)
-			{
-				convertColumn4(colDst, texWidth, src, colNum);
-				src += 64;
-				colDst += texWidth * 4;
-			}
+			// Widths are powers of 2, so anything over 32 will be an integral number of columns wide.
+			// 16 wide textures are dealt with as a special case in the SIMD code.
+			// Note: for small textures it still may be a win to do the SIMD swizzle and then cut out the sub-region to
+			// correct the row stride.
+			return CGSH_OpenGL::TexUpdater_Psm48<CGsPixelFormats::CPixelIndexorPSMT4>(bufPtr, bufWidth, texX, texY, texWidth, texHeight);
 		}
 
-		dst += texWidth * 16;
-	}
-	glTexSubImage2D(GL_TEXTURE_2D, 0, texX, texY, texWidth, texHeight, GL_RED, GL_UNSIGNED_BYTE, m_pCvtBuffer);
-	CHECKGLERROR();
+		CGsPixelFormats::CPixelIndexorPSMT4 indexor(m_pRAM, bufPtr, bufWidth);
+
+		uint8* dst = m_pCvtBuffer;
+		for(unsigned int y = 0; y < texHeight; y += 16)
+		{
+			for(unsigned int x = 0; x < texWidth; x += 32)
+			{
+				uint8* colDst = dst + x;
+				unsigned int nx = texX + x;
+				unsigned int ny = texY + y;
+				uint32 colAddr = indexor.GetColumnAddress(nx, ny);
+				uint8* src = m_pRAM + colAddr;
+
+				// process an entire 32x16 block.
+				// A column (64 bytes) is 32x4 pixels and they stack vertically in a block
+
+				for(unsigned int colNum = 0; colNum < 4; ++colNum)
+				{
+					convertColumn4(colDst, texWidth, src, colNum);
+					src += 64;
+					colDst += texWidth * 4;
+				}
+			}
+
+			dst += texWidth * 16;
+		}
+		glTexSubImage2D(GL_TEXTURE_2D, 0, texX, texY, texWidth, texHeight, GL_RED, GL_UNSIGNED_BYTE, m_pCvtBuffer);
+		CHECKGLERROR();
+	#endif
 }
 
 template <typename IndexorType>
