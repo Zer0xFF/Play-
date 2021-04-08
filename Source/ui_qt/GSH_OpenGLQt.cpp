@@ -15,7 +15,7 @@
 #endif
 
 CGSH_OpenGLQt::CGSH_OpenGLQt(QSurface* renderSurface)
-    : m_renderSurface(renderSurface)
+    : CGSH_OpenGL(false), m_renderSurface(renderSurface)
 {
 }
 

@@ -58,9 +58,9 @@ if(USE_GSH_VULKAN)
 endif()
 
 if(TARGET_PLATFORM_UNIX)
-	find_package(LIBEVDEV REQUIRED)
-	list(APPEND PROJECT_LIBS ${LIBEVDEV_LIBRARY})
-	list(APPEND DEFINITIONS_LIST HAS_LIBEVDEV=1)
+	# find_package(LIBEVDEV REQUIRED)
+	# list(APPEND PROJECT_LIBS ${LIBEVDEV_LIBRARY})
+	# list(APPEND DEFINITIONS_LIST HAS_LIBEVDEV=1)
 
 	list(APPEND PROJECT_LIBS "-static-libgcc")
 	list(APPEND PROJECT_LIBS "-static-libstdc++")
@@ -237,15 +237,15 @@ set(QT_RESOURCES
 )
 
 set(QT_COMPONENTS Widgets Core)
-if(TARGET_PLATFORM_UNIX)
-	list(APPEND QT_COMPONENTS X11Extras)
-endif()
+# if(TARGET_PLATFORM_UNIX)
+# 	list(APPEND QT_COMPONENTS X11Extras)
+# endif()
 find_package(Qt5 REQUIRED COMPONENTS ${QT_COMPONENTS})
 
 list(APPEND PROJECT_LIBS Qt5::Widgets Qt5::Core)
-if(TARGET_PLATFORM_UNIX)
-	list(APPEND PROJECT_LIBS Qt5::X11Extras)
-endif()
+# if(TARGET_PLATFORM_UNIX)
+# 	list(APPEND PROJECT_LIBS Qt5::X11Extras)
+# endif()
 
 add_definitions(${QT_DEFINITIONS})
 
@@ -303,7 +303,14 @@ elseif(TARGET_PLATFORM_WIN32)
 	add_executable(Play WIN32 ${QT_SOURCES} ${QT_MOC_SRCS} ${QT_RES_SOURCES} ${QT_UI_HEADERS})
 elseif(TARGET_PLATFORM_UNIX)
 	add_executable(Play ${QT_SOURCES} ${QT_MOC_SRCS} ${QT_RES_SOURCES} ${QT_UI_HEADERS})
+	set_target_properties(Play PROPERTIES LINK_FLAGS " -s EXTRA_EXPORTED_RUNTIME_METHODS=[UTF16ToString,stringToUTF16] -s DEMANGLE_SUPPORT=1 -s WASM=1 -s MIN_WEBGL_VERSION=2 -s FULL_ES3=1 -s EXPORT_ALL=1 -s DISABLE_EXCEPTION_CATCHING=0 --bind -fexceptions -s ALLOW_MEMORY_GROWTH=1 -s USE_PTHREADS=1 -Wl,--shared-memory,--no-check-features -s ASSERTIONS=0 -s PTHREAD_POOL_SIZE=12 -s ENVIRONMENT=web,worker")
+	
+	# target_compile_options(Play PUBLIC "--shared-memory --no-check-features")
 
+	set(APPNAME Play)
+	configure_file("${_qt5Core_install_prefix}/plugins/platforms/wasm_shell.html" "Play.html")
+	configure_file("${_qt5Core_install_prefix}/plugins/platforms/qtloader.js" qtloader.js COPYONLY)
+	configure_file("${_qt5Core_install_prefix}/plugins/platforms/qtlogo.svg" qtlogo.svg COPYONLY)
 	install(TARGETS Play DESTINATION bin RENAME Play PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ)
 
 	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../icons/icon_base.png DESTINATION share/icons/hicolor/1024x1024/apps RENAME Play.png)
@@ -313,13 +320,13 @@ else()
 	add_executable(Play ${QT_SOURCES} ${QT_MOC_SRCS} ${QT_RES_SOURCES} ${QT_UI_HEADERS})
 endif()
 
-target_link_libraries(Play ${PROJECT_LIBS})
+target_link_libraries(Play ${PROJECT_LIBS} libc++)
 target_compile_definitions(Play PRIVATE ${DEFINITIONS_LIST})
 
 target_include_directories(Play PRIVATE
 	./
 	../../
-	${LIBEVDEV_INCLUDE_DIR}
+	# ${LIBEVDEV_INCLUDE_DIR}
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 

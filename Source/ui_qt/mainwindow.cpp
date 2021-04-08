@@ -27,6 +27,7 @@
 #include <ctime>
 #include <QtGlobal>
 
+#include <emscripten.h>
 #include "StdStreamUtils.h"
 #include "string_format.h"
 
@@ -108,6 +109,17 @@ MainWindow::MainWindow(QWidget* parent)
 	InitVirtualMachine();
 	SetupGsHandler();
 
+	auto timer = new QTimer(this);
+	connect(timer, &QTimer::timeout, [this]()
+	{
+		if(m_virtualMachine)
+		{
+			if(m_virtualMachine->GetStatus() != CVirtualMachine::PAUSED)
+				if(m_virtualMachine->GetGSHandler())
+					m_virtualMachine->GetGSHandler()->ProcessSingleFrame();
+		}
+	});
+	timer->start(16);
 #ifdef DEBUGGER_INCLUDED
 	m_debugger = std::make_unique<QtDebugger>(*m_virtualMachine);
 	m_frameDebugger = std::make_unique<QtFramedebugger>();
@@ -222,7 +234,7 @@ void MainWindow::SetupGsHandler()
 		QWidget* container = QWidget::createWindowContainer(m_outputwindow);
 		m_outputwindow->create();
 		ui->gridLayout->addWidget(container, 0, 0);
-		m_virtualMachine->CreateGSHandler(CGSH_OpenGLQt::GetFactoryFunction(m_outputwindow));
+		m_virtualMachine->CreateGsHandlerImpl(CGSH_OpenGLQt::GetFactoryFunction(m_outputwindow));
 	}
 	}
 
@@ -275,13 +287,35 @@ void MainWindow::outputWindow_resized()
 		m_virtualMachine->m_ee->m_gs->SetPresentationParams(presentationParams);
 		if(m_virtualMachine->GetStatus() == CVirtualMachine::PAUSED)
 		{
-			m_virtualMachine->m_ee->m_gs->Flip(true);
+			//m_virtualMachine->m_ee->m_gs->Flip(true);
 		}
 	}
 }
 
 void MainWindow::on_actionBoot_DiscImage_triggered()
 {
+#if defined(__EMSCRIPTEN__)
+	bool returned = false;
+	QFileDialog::getOpenFileContent(QtUtils::GetDiscImageFormatsFilter(), [this, &returned](const QString &fileName, const QByteArray &fileContent){
+		auto filePath = QStringToPath(fileName);
+		if(m_virtualMachine != nullptr)
+		{
+			try
+			{
+				LoadCDROM(filePath);
+				BootCDROM();
+			}
+			catch(const std::exception& e)
+			{
+				QMessageBox messageBox;
+				messageBox.critical(nullptr, "Error", e.what());
+				messageBox.show();
+			}
+			returned = true;
+		}
+	});
+	sleep(30);
+#else
 	QStringList filters;
 	filters.push_back(QtUtils::GetDiscImageFormatsFilter());
 	filters.push_back("All files (*)");
@@ -308,6 +342,7 @@ void MainWindow::on_actionBoot_DiscImage_triggered()
 			}
 		}
 	}
+#endif
 }
 
 void MainWindow::on_actionBoot_DiscImage_S3_triggered()

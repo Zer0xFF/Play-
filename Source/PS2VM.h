@@ -91,6 +91,7 @@ public:
 	IopSubSystemPtr m_iop;
 
 	ProfileFrameDoneSignal ProfileFrameDone;
+	void CreateGsHandlerImpl(const CGSHandler::FactoryFunction&);
 
 private:
 	typedef std::unique_ptr<COpticalMedia> OpticalMediaPtr;
@@ -108,7 +109,6 @@ private:
 	void PauseImpl();
 	void DestroyImpl();
 
-	void CreateGsHandlerImpl(const CGSHandler::FactoryFunction&);
 	void DestroyGsHandlerImpl();
 
 	void CreatePadHandlerImpl(const CPadHandler::FactoryFunction&);

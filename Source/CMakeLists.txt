@@ -35,7 +35,7 @@ if(TARGET_PLATFORM_ANDROID OR TARGET_PLATFORM_IOS OR BUILD_AOT_CACHE)
 endif()
 
 if(TARGET_PLATFORM_UNIX AND NOT TARGET_PLATFORM_UNIX_ARM AND NOT TARGET_PLATFORM_UNIX_AARCH64)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse -msse2 -mssse3")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse -msse2 -mssse3 -msimd128")
 endif()
 
 # targets, packages and dependencies
@@ -104,7 +104,7 @@ endif()
 
 if(NOT (TARGET_PLATFORM_ANDROID OR TARGET_PLATFORM_IOS))
 	set(THREADS_PREFER_PTHREAD_FLAG ON)
-	find_package(Threads REQUIRED)
+	find_package(Threads)
 	list(APPEND PROJECT_LIBS Threads::Threads)
 endif()
 
