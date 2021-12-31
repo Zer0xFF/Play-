@@ -100,7 +100,7 @@ void MemoryCardManagerDialog::on_savelistWidget_currentRowChanged(int currentRow
 	{
 		const CSave* save = m_pCurrentMemoryCard->GetSaveByIndex(currentRow);
 		QDateTime* dt = new QDateTime;
-		dt->setTime_t(save->GetLastModificationTime());
+		dt->setSecsSinceEpoch(save->GetLastModificationTime());
 		QString datetime = dt->toUTC().toString("hh:mm - dd.MM.yyyy");
 
 		ui->label_name->setText(QString::fromWCharArray(save->GetName()));
