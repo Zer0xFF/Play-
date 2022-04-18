@@ -506,6 +506,7 @@ void CMA_MIPSIV::DADDI()
 void CMA_MIPSIV::DADDIU()
 {
 	if(m_nRT == 0) return;
+	if(m_nRT == CMIPS::REGISTER::V0 && m_nRS == CMIPS::REGISTER::V0 && m_nImmediate == 8) return;
 
 	assert(m_regSize == MIPS_REGSIZE_64);
 
