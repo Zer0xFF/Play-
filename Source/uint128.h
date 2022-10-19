@@ -23,6 +23,18 @@ struct uint128
 			uint64 nD1;
 		};
 	};
+
+	inline bool operator<(const uint128& rhs) const
+	{
+		const auto& lhs = (*this);
+		return std::tie(lhs.nD1, lhs.nD0) <  std::tie(rhs.nD1, rhs.nD0);
+	}
+
+	inline bool operator==(const uint128& rhs) const
+	{
+		const auto& lhs = (*this);
+		return std::tie(lhs.nD1, lhs.nD0) ==  std::tie(rhs.nD1, rhs.nD0);
+	}
 };
 
 #endif
