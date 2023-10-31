@@ -21,6 +21,11 @@ CGamePadInputEventInterface::~CGamePadInputEventInterface()
 	m_thread.join();
 }
 
+GamePadDeviceId CGamePadInputEventInterface::GetDeviceID()
+{
+	return m_deviceId;
+}
+
 void CGamePadInputEventInterface::InputDeviceListenerThread()
 {
 	if(access(m_device.c_str(), R_OK) == -1)
@@ -47,7 +52,7 @@ void CGamePadInputEventInterface::InputDeviceListenerThread()
 	}
 	initdev_result = 0;
 
-	auto device = CGamePadUtils::GetDeviceID(dev);
+	m_deviceId = CGamePadUtils::GetDeviceID(dev);
 
 	struct timespec ts;
 	ts.tv_nsec = 5e+8; // 500 millisecond

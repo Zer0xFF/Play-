@@ -11,14 +11,14 @@
 
 #include "filesystem_def.h"
 
-class CGamePadDeviceListener
+class CGamePadDeviceManager
 {
 public:
 	typedef std::function<void(GamePadDeviceId, int, int, int, const input_absinfo*)> OnInputEvent;
 
-	CGamePadDeviceListener(OnInputEvent);
+	CGamePadDeviceManager(OnInputEvent);
 
-	~CGamePadDeviceListener();
+	~CGamePadDeviceManager();
 
 	struct inputdevice
 	{
@@ -26,7 +26,7 @@ public:
 		std::array<uint32, 6> uniq_id;
 		std::string path;
 	};
-	typedef std::pair<std::string, CGamePadDeviceListener::inputdevice> inputdev_pair;
+	typedef std::pair<std::string, CGamePadDeviceManager::inputdevice> inputdev_pair;
 	OnInputEvent OnInputEventCallBack;
 
 	void UpdateOnInputEventCallback(OnInputEvent);
@@ -34,7 +34,7 @@ public:
 	static bool IsValidDevice(const fs::path&, inputdev_pair&);
 
 private:
-	std::map<std::string, CGamePadDeviceListener::inputdevice> m_devicelist;
+	std::map<std::string, CGamePadDeviceManager::inputdevice> m_devicelist;
 	std::map<std::string, std::unique_ptr<CGamePadInputEventInterface>> m_GPIEList;
 	std::atomic<bool> m_running;
 	std::thread m_inputdevicelistenerthread;

@@ -2,7 +2,7 @@
 
 #include "input/InputProvider.h"
 #include "GamePadUtils.h"
-#include "GamePadDeviceListener.h"
+#include "GamePadDeviceManager.h"
 
 class CInputProviderEvDev : public CInputProvider
 {
@@ -15,5 +15,5 @@ public:
 
 private:
 	void OnEvDevInputEvent(GamePadDeviceId, int, int, int, const input_absinfo*);
-	CGamePadDeviceListener m_GPDL;
+	CGamePadDeviceManager m_GPDM;
 };

@@ -151,8 +151,8 @@ endif()
 if(LIBEVDEV_FOUND)
 	set(QT_SOURCES
 		${QT_SOURCES}
-		unix/GamePadDeviceListener.cpp
-		unix/GamePadDeviceListener.h
+		unix/GamePadDeviceManager.cpp
+		unix/GamePadDeviceManager.h
 		unix/GamePadInputEventInterface.cpp
 		unix/GamePadInputEventInterface.h
 		unix/GamePadUtils.cpp

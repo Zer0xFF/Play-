@@ -5,7 +5,7 @@
 constexpr uint32 PROVIDER_ID = 'evdv';
 
 CInputProviderEvDev::CInputProviderEvDev()
-    : m_GPDL([this](auto a, auto b, auto c, auto d, auto e) { this->OnEvDevInputEvent(a, b, c, d, e); })
+    : m_GPDM([this](auto a, auto b, auto c, auto d, auto e) { this->OnEvDevInputEvent(a, b, c, d, e); })
 {
 }
 
