@@ -153,8 +153,8 @@ if(LIBEVDEV_FOUND)
 		${QT_SOURCES}
 		unix/GamePadDeviceListener.cpp
 		unix/GamePadDeviceListener.h
-		unix/GamePadInputEventListener.cpp
-		unix/GamePadInputEventListener.h
+		unix/GamePadInputEventInterface.cpp
+		unix/GamePadInputEventInterface.h
 		unix/GamePadUtils.cpp
 		unix/GamePadUtils.h
 		unix/InputProviderEvDev.cpp

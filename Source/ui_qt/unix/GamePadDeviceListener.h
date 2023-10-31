@@ -6,7 +6,7 @@
 #include <libevdev.h>
 
 #include "GamePadUtils.h"
-#include "GamePadInputEventListener.h"
+#include "GamePadInputEventInterface.h"
 #include "Types.h"
 
 #include "filesystem_def.h"
@@ -35,11 +35,11 @@ public:
 
 private:
 	std::map<std::string, CGamePadDeviceListener::inputdevice> m_devicelist;
-	std::map<std::string, std::unique_ptr<CGamePadInputEventListener>> m_GPIEList;
+	std::map<std::string, std::unique_ptr<CGamePadInputEventInterface>> m_GPIEList;
 	std::atomic<bool> m_running;
 	std::thread m_inputdevicelistenerthread;
 	std::thread m_thread;
-	std::map<std::string, CGamePadInputEventListener::OnInputEventType::Connection> m_connectionlist;
+	std::map<std::string, CGamePadInputEventInterface::OnInputEventType::Connection> m_connectionlist;
 
 	void UpdateDeviceList();
 	void AddDevice(const fs::path&);

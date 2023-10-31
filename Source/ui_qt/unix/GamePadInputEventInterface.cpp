@@ -1,4 +1,4 @@
-#include "GamePadInputEventListener.h"
+#include "GamePadInputEventInterface.h"
 #include <fcntl.h>
 #include <sys/select.h>
 #include <sys/time.h>
@@ -7,32 +7,32 @@
 #include <cstring>
 #include <unistd.h>
 
-CGamePadInputEventListener::CGamePadInputEventListener(std::string device)
+CGamePadInputEventInterface::CGamePadInputEventInterface(std::string device)
     : m_device(device)
     , m_running(true)
 {
 	m_thread = std::thread([this]() { InputDeviceListenerThread(); });
 }
 
-CGamePadInputEventListener::~CGamePadInputEventListener()
+CGamePadInputEventInterface::~CGamePadInputEventInterface()
 {
 	m_running = false;
 	OnInputEvent.Reset();
 	m_thread.join();
 }
 
-void CGamePadInputEventListener::InputDeviceListenerThread()
+void CGamePadInputEventInterface::InputDeviceListenerThread()
 {
 	if(access(m_device.c_str(), R_OK) == -1)
 	{
-		fprintf(stderr, "CGamePadInputEventListener::InputDeviceListenerThread: no read access to (%s)\n", m_device.c_str());
+		fprintf(stderr, "CGamePadInputEventInterface::InputDeviceListenerThread: no read access to (%s)\n", m_device.c_str());
 		return;
 	}
 
 	int fd = open(m_device.c_str(), O_RDONLY | O_NONBLOCK);
 	if(fd < 0)
 	{
-		perror("CGamePadInputEventListener::InputDeviceListenerThread Failed to open device");
+		perror("CGamePadInputEventInterface::InputDeviceListenerThread Failed to open device");
 		return;
 	}
 
@@ -40,7 +40,7 @@ void CGamePadInputEventListener::InputDeviceListenerThread()
 	int initdev_result = libevdev_new_from_fd(fd, &dev);
 	if(initdev_result < 0)
 	{
-		fprintf(stderr, "CGamePadInputEventListener::InputDeviceListenerThread Failed to init libevdev (%s)\n", strerror(-initdev_result));
+		fprintf(stderr, "CGamePadInputEventInterface::InputDeviceListenerThread Failed to init libevdev (%s)\n", strerror(-initdev_result));
 		libevdev_free(dev);
 		close(fd);
 		return;

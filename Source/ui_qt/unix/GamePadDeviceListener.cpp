@@ -41,7 +41,7 @@ void CGamePadDeviceListener::UpdateOnInputEventCallback(CGamePadDeviceListener::
 		}
 		else
 		{
-			auto GamePadInput = std::make_unique<CGamePadInputEventListener>(device.second.path);
+			auto GamePadInput = std::make_unique<CGamePadInputEventInterface>(device.second.path);
 			m_connectionlist.emplace(device.first, GamePadInput->OnInputEvent.Connect(OnInputEventCallBack));
 			m_GPIEList.emplace(device.first, std::move(GamePadInput));
 		}
@@ -75,7 +75,7 @@ void CGamePadDeviceListener::AddDevice(const fs::path& path)
 		m_devicelist.insert(idp);
 		if(OnInputEventCallBack)
 		{
-			auto GamePadInput = std::make_unique<CGamePadInputEventListener>(idp.second.path);
+			auto GamePadInput = std::make_unique<CGamePadInputEventInterface>(idp.second.path);
 			m_connectionlist.emplace(idp.first, GamePadInput->OnInputEvent.Connect(OnInputEventCallBack));
 			m_GPIEList.emplace(idp.first, std::move(GamePadInput));
 		}

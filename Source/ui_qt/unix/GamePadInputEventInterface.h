@@ -7,11 +7,11 @@
 #include "Types.h"
 #include "GamePadUtils.h"
 
-class CGamePadInputEventListener
+class CGamePadInputEventInterface
 {
 public:
-	CGamePadInputEventListener(std::string);
-	virtual ~CGamePadInputEventListener();
+	CGamePadInputEventInterface(std::string);
+	virtual ~CGamePadInputEventInterface();
 
 	typedef Framework::CSignal<void(GamePadDeviceId, int, int, int, const input_absinfo*)> OnInputEventType;
 	OnInputEventType OnInputEvent;
