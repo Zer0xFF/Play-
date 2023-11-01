@@ -114,8 +114,8 @@ void CInputProviderMacOsHid::InputReportCallbackStub_DS4(void* context, IOReturn
 
 void CInputProviderMacOsHid::OnDeviceMatched(IOReturn result, void* sender, IOHIDDeviceRef device)
 {
-	m_devices.push_back(DEVICE_INFO());
-	auto& deviceInfo = *m_devices.rbegin();
+	m_devices.push_back(GetDeviceID(device), DEVICE_INFO());
+	auto& deviceInfo = *m_devices.find(GetDeviceID(device));
 	deviceInfo.provider = this;
 	deviceInfo.device = device;
 	deviceInfo.deviceId = GetDeviceID(device);

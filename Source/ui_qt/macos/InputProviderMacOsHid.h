@@ -2,7 +2,7 @@
 
 #include <atomic>
 #include <thread>
-#include <list>
+#include <unordered_map>
 #include <IOKit/hid/IOHIDManager.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include "input/InputProvider.h"
@@ -121,5 +121,5 @@ private:
 	bool m_filter;
 	std::thread m_thread;
 	IOHIDManagerRef m_hidManager;
-	std::list<DEVICE_INFO> m_devices;
+	std::unordered_map<DeviceIdType, DEVICE_INFO> m_devices;
 };
