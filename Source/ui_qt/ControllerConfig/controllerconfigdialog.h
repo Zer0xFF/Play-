@@ -59,4 +59,5 @@ private:
 	CInputProviderQtKey* m_qtKeyInputProvider = nullptr;
 	CInputProviderQtMouse* m_qtMouseInputProvider = nullptr;
 	std::vector<PadUiElements> m_padUiElements;
+	std::vector<DEVICEINFO> m_devices;
 };
