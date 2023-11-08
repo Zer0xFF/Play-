@@ -146,5 +146,5 @@ void CIdleEvaluator::STRATEGY_THREADROTATEBOUNCE::NotifyEvent(EVENT eventType, u
 	default:
 		break;
 	}
-	m_isIdle = (m_bounceCount > 1000);
+	m_isIdle = (m_bounceCount > 100);
 }
