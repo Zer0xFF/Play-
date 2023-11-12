@@ -114,11 +114,12 @@ void CInputProviderMacOsHid::InputReportCallbackStub_DS4(void* context, IOReturn
 
 void CInputProviderMacOsHid::OnDeviceMatched(IOReturn result, void* sender, IOHIDDeviceRef device)
 {
-	m_devices.push_back(GetDeviceID(device), DEVICE_INFO());
-	auto& deviceInfo = *m_devices.find(GetDeviceID(device));
+	auto deviceId = GetDeviceID(device);
+	assert(m_devices.find(deviceId));
+	auto& deviceInfo = m_devices[deviceId];
 	deviceInfo.provider = this;
 	deviceInfo.device = device;
-	deviceInfo.deviceId = GetDeviceID(device);
+	deviceInfo.deviceId = deviceId;
 
 	auto InputReportCallbackStub = GetCallback(device);
 	if(InputReportCallbackStub)
@@ -132,6 +133,7 @@ void CInputProviderMacOsHid::OnDeviceMatched(IOReturn result, void* sender, IOHI
 		SetInitialBindValues(device);
 		IOHIDDeviceRegisterInputValueCallback(device, &InputValueCallbackStub, &deviceInfo);
 	}
+	CreateForceFeedbackDevice(deviceInfo);
 }
 
 void CInputProviderMacOsHid::InputValueCallback(DEVICE_INFO* deviceInfo, IOReturn result, void* sender, IOHIDValueRef valueRef)
@@ -357,4 +359,81 @@ void CInputProviderMacOsHid::InputDeviceListenerThread()
 	}
 
 	IOHIDManagerClose(m_hidManager, 0);
+}
+
+void CInputProviderMacOsHid::UpdateForceFeedbackEffect(DEVICE_INFO& device, uint8_t largeMotor, uint8_t smallMotor)
+{
+	uint32_t dwGain = 0;
+	if(largeMotor)
+	{
+		dwGain = 1000 + (largeMotor / 255.0) * (FF_FFNOMINALMAX - 1000);
+	}
+	else if(smallMotor)
+	{
+		dwGain = 1000;
+	}
+
+	device.effectInfo.dwGain = dwGain;
+	FFEffectSetParameters(device.ffEffect, &device.effectInfo, FFEP_GAIN);
+}
+
+bool CInputProviderMacOsHid::CreateForceFeedbackEffect(DEVICE_INFO& device)
+{
+	FFEFFECT& effectInfo = device.effectInfo;
+	memset(&effectInfo, 0, sizeof(effectInfo));
+
+	effectInfo.dwSize = sizeof(FFEFFECT);
+	effectInfo.dwFlags = FFEFF_CARTESIAN | FFEFF_OBJECTOFFSETS;
+	effectInfo.dwDuration = 500000;
+	effectInfo.dwTriggerButton = FFEB_NOTRIGGER;
+	effectInfo.dwTriggerRepeatInterval = FF_INFINITE;
+	effectInfo.cAxes = 2;
+	effectInfo.rglDirection = &device.rglDirection;
+
+	HRESULT result = FFDeviceCreateEffect(device.ffDevice, kFFEffectType_ConstantForce_ID, &effectInfo, &device.ffEffect);
+	return result == FF_OK;
+}
+
+void CInputProviderMacOsHid::CreateForceFeedbackDevice(DEVICE_INFO& device)
+{
+	auto service = IOHIDDeviceGetService(device.device);
+	if(service == MACH_PORT_NULL)
+		return;
+
+	HRESULT res = FFIsForceFeedback(service);
+	if(res != FF_OK)
+		return;
+
+	FFDeviceObjectReference ffDevice;
+	res = FFCreateDevice(service, &ffDevice);
+	if(res != FF_OK)
+		return;
+
+	if(!CreateForceFeedbackEffect(device))
+	{
+		FFReleaseDevice(ffDevice);
+		ffDevice = nullptr;
+	}
+	device.ffDevice = ffDevice;
+}
+
+void CInputProviderMacOsHid::SetVibration(DeviceIdType deviceId, uint8_t largeMotor, uint8_t smallMotor)
+{
+	auto itr = m_devices.find(deviceId);
+	if(itr == m_devices.end())
+		return;
+
+	auto& device = m_devices[deviceId];
+	if(!device.ffDevice)
+		return;
+
+	if(largeMotor + smallMotor)
+	{
+		UpdateForceFeedbackEffect(device, largeMotor, smallMotor);
+		FFEffectStart(device.ffEffect, 1, 0);
+	}
+	else
+	{
+		FFEffectStop(device.ffEffect);
+	}
 }

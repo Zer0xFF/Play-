@@ -298,7 +298,7 @@ if(TARGET_PLATFORM_MACOS)
 		RESOURCE "${OSX_RES}"
 	)
 	SET_SOURCE_FILES_PROPERTIES(${ARCADE_DEFS} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources/arcadedefs")
-	list(APPEND PROJECT_LIBS "-framework IOKit -framework CoreFoundation")
+	list(APPEND PROJECT_LIBS "-framework IOKit -framework ForceFeedback -framework CoreFoundation")
 	if(USE_GSH_VULKAN)
 		target_include_directories(Play PRIVATE $ENV{VULKAN_SDK}/../MoltenVK/include)
 	endif()

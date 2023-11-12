@@ -2,9 +2,10 @@
 
 #include <atomic>
 #include <thread>
-#include <unordered_map>
+#include <map>
 #include <IOKit/hid/IOHIDManager.h>
 #include <CoreFoundation/CoreFoundation.h>
+#include <ForceFeedback/ForceFeedback.h>
 #include "input/InputProvider.h"
 
 class CInputProviderMacOsHid : public CInputProvider
@@ -15,6 +16,7 @@ public:
 
 	uint32 GetId() const override;
 	std::string GetTargetDescription(const BINDINGTARGET&) const override;
+	void SetVibration(DeviceIdType deviceId, uint8_t largeMotor, uint8_t smallMotor) override;
 
 private:
 	enum
@@ -29,6 +31,11 @@ private:
 		IOHIDDeviceRef device;
 		bool first_run = true;
 		uint8_t prev_btn_state[BTN_STATE_SIZE];
+
+		FFDeviceObjectReference ffDevice = nullptr;
+		FFEffectObjectReference ffEffect = nullptr;
+		FFEFFECT effectInfo;
+		LONG rglDirection = 0;
 	};
 
 	struct PS3Btn
@@ -116,10 +123,14 @@ private:
 	IOHIDReportCallback GetCallback(IOHIDDeviceRef device);
 	void SetInitialBindValues(IOHIDDeviceRef device);
 
+	void UpdateForceFeedbackEffect(DEVICE_INFO& device, uint8_t largeMotor, uint8_t smallMotor);
+	bool CreateForceFeedbackEffect(DEVICE_INFO& device);
+	void CreateForceFeedbackDevice(DEVICE_INFO& device);
+
 	std::atomic<bool> m_running;
 	std::thread m_inputdevicelistenerthread;
 	bool m_filter;
 	std::thread m_thread;
 	IOHIDManagerRef m_hidManager;
-	std::unordered_map<DeviceIdType, DEVICE_INFO> m_devices;
+	std::map<DeviceIdType, DEVICE_INFO> m_devices;
 };
