@@ -25,13 +25,15 @@ public:
 		std::string name;
 		std::array<uint32, 6> uniq_id;
 		std::string path;
+		int fd = 0;
+		struct libevdev* dev = nullptr;
 	};
 	typedef std::pair<std::string, CGamePadDeviceManager::inputdevice> inputdev_pair;
 	OnInputEvent OnInputEventCallBack;
 
 	void UpdateOnInputEventCallback(OnInputEvent);
 	void DisconnectInputEventCallback();
-	static bool IsValidDevice(const fs::path&, inputdev_pair&);
+	static bool OpenDevice(const fs::path&, inputdev_pair&);
 
 private:
 	std::map<std::string, CGamePadDeviceManager::inputdevice> m_devicelist;

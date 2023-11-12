@@ -41,7 +41,7 @@ void CGamePadDeviceManager::UpdateOnInputEventCallback(CGamePadDeviceManager::On
 		}
 		else
 		{
-			auto GamePadInput = std::make_unique<CGamePadInputEventInterface>(device.second.path);
+			auto GamePadInput = std::make_unique<CGamePadInputEventInterface>(device.second.fd, device.second.dev, device.second.uniq_id);
 			m_connectionlist.emplace(device.first, GamePadInput->OnInputEvent.Connect(OnInputEventCallBack));
 			m_GPIEList.emplace(device.first, std::move(GamePadInput));
 		}
@@ -70,12 +70,13 @@ void CGamePadDeviceManager::UpdateDeviceList()
 void CGamePadDeviceManager::AddDevice(const fs::path& path)
 {
 	inputdev_pair idp;
-	if(IsValidDevice(path, idp))
+	if(OpenDevice(path, idp))
 	{
 		m_devicelist.insert(idp);
 		if(OnInputEventCallBack)
 		{
-			auto GamePadInput = std::make_unique<CGamePadInputEventInterface>(idp.second.path);
+			auto& device = idp.second;
+			auto GamePadInput = std::make_unique<CGamePadInputEventInterface>(device.fd, device.dev, device.uniq_id);
 			m_connectionlist.emplace(idp.first, GamePadInput->OnInputEvent.Connect(OnInputEventCallBack));
 			m_GPIEList.emplace(idp.first, std::move(GamePadInput));
 		}
@@ -84,7 +85,13 @@ void CGamePadDeviceManager::AddDevice(const fs::path& path)
 
 void CGamePadDeviceManager::RemoveDevice(std::string key)
 {
-	m_devicelist.erase(key);
+	auto itr = m_devicelist.find(key);
+	if(itr != m_devicelist.end())
+	{
+		libevdev_free(itr->second.dev);
+		close(itr->second.fd);
+		m_devicelist.erase(itr);
+	}
 	m_GPIEList.erase(key);
 	m_connectionlist.erase(key);
 }
@@ -152,7 +159,7 @@ void CGamePadDeviceManager::InputDeviceListenerThread()
 	close(fd);
 }
 
-bool CGamePadDeviceManager::IsValidDevice(const fs::path& inputdev_path, inputdev_pair& devinfo)
+bool CGamePadDeviceManager::OpenDevice(const fs::path& inputdev_path, inputdev_pair& devinfo)
 {
 	if(access(inputdev_path.string().c_str(), R_OK) == -1)
 	{
@@ -163,7 +170,7 @@ bool CGamePadDeviceManager::IsValidDevice(const fs::path& inputdev_path, inputde
 	int fd = open(inputdev_path.string().c_str(), O_RDONLY);
 	if(fd < 0)
 	{
-		fprintf(stderr, "CGamePadDeviceManager::IsValidDevice: Error Failed to open (%s)\n", inputdev_path.string().c_str());
+		fprintf(stderr, "CGamePadDeviceManager::OpenDevice: Error Failed to open (%s)\n", inputdev_path.string().c_str());
 		return res;
 	}
 
@@ -171,7 +178,7 @@ bool CGamePadDeviceManager::IsValidDevice(const fs::path& inputdev_path, inputde
 	int initdev_result = libevdev_new_from_fd(fd, &dev);
 	if(initdev_result < 0)
 	{
-		fprintf(stderr, "CGamePadDeviceManager::IsValidDevice: Failed to init libevdev (%s)\n", strerror(-initdev_result));
+		fprintf(stderr, "CGamePadDeviceManager::OpenDevice: Failed to init libevdev (%s)\n", strerror(-initdev_result));
 		libevdev_free(dev);
 		close(fd);
 		return res;
@@ -189,11 +196,11 @@ bool CGamePadDeviceManager::IsValidDevice(const fs::path& inputdev_path, inputde
 	id.name = name;
 	id.uniq_id = device;
 	id.path = inputdev_path.string();
+	id.dev = dev;
+	id.fd = fd;
 
 	devinfo = std::make_pair(inputdev_path.filename().string(), id);
 	res = true;
 
-	libevdev_free(dev);
-	close(fd);
 	return res;
 }

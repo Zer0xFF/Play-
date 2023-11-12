@@ -10,18 +10,20 @@
 class CGamePadInputEventInterface
 {
 public:
-	CGamePadInputEventInterface(std::string);
+	CGamePadInputEventInterface(int fd, struct libevdev*, GamePadDeviceId deviceId);
 	virtual ~CGamePadInputEventInterface();
 
 	typedef Framework::CSignal<void(GamePadDeviceId, int, int, int, const input_absinfo*)> OnInputEventType;
 	OnInputEventType OnInputEvent;
 
-	GamePadDeviceId GetDeviceID();
 private:
 	GamePadDeviceId m_deviceId;
 	std::string m_device;
 	std::atomic<bool> m_running;
 	std::thread m_thread;
+
+	int m_fd = 0;
+	struct libevdev* m_dev = nullptr;
 
 	void InputDeviceListenerThread();
 };

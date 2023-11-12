@@ -7,8 +7,10 @@
 #include <cstring>
 #include <unistd.h>
 
-CGamePadInputEventInterface::CGamePadInputEventInterface(std::string device)
-    : m_device(device)
+CGamePadInputEventInterface::CGamePadInputEventInterface(int fd, struct libevdev* dev, GamePadDeviceId deviceId)
+    : m_fd(fd)
+    , m_dev(dev)
+    , m_deviceId(deviceId)
     , m_running(true)
 {
 	m_thread = std::thread([this]() { InputDeviceListenerThread(); });
@@ -21,39 +23,8 @@ CGamePadInputEventInterface::~CGamePadInputEventInterface()
 	m_thread.join();
 }
 
-GamePadDeviceId CGamePadInputEventInterface::GetDeviceID()
-{
-	return m_deviceId;
-}
-
 void CGamePadInputEventInterface::InputDeviceListenerThread()
 {
-	if(access(m_device.c_str(), R_OK) == -1)
-	{
-		fprintf(stderr, "CGamePadInputEventInterface::InputDeviceListenerThread: no read access to (%s)\n", m_device.c_str());
-		return;
-	}
-
-	int fd = open(m_device.c_str(), O_RDONLY | O_NONBLOCK);
-	if(fd < 0)
-	{
-		perror("CGamePadInputEventInterface::InputDeviceListenerThread Failed to open device");
-		return;
-	}
-
-	struct libevdev* dev = NULL;
-	int initdev_result = libevdev_new_from_fd(fd, &dev);
-	if(initdev_result < 0)
-	{
-		fprintf(stderr, "CGamePadInputEventInterface::InputDeviceListenerThread Failed to init libevdev (%s)\n", strerror(-initdev_result));
-		libevdev_free(dev);
-		close(fd);
-		return;
-	}
-	initdev_result = 0;
-
-	m_deviceId = CGamePadUtils::GetDeviceID(dev);
-
 	struct timespec ts;
 	ts.tv_nsec = 5e+8; // 500 millisecond
 
@@ -67,30 +38,27 @@ void CGamePadInputEventInterface::InputDeviceListenerThread()
 	while(m_running)
 	{
 		FD_ZERO(&fds);
-		FD_SET(fd, &fds);
-		if(pselect(fd + 1, &fds, NULL, NULL, &ts, &mask) == 0) continue;
+		FD_SET(m_fd, &fds);
+		if(pselect(m_fd + 1, &fds, NULL, NULL, &ts, &mask) == 0) continue;
 
 		int rc = 0;
 		do
 		{
 			struct input_event ev;
-			rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+			rc = libevdev_next_event(m_dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
 			if(rc == LIBEVDEV_READ_STATUS_SYNC)
 			{
 				while(rc == LIBEVDEV_READ_STATUS_SYNC)
 				{
-					rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
+					rc = libevdev_next_event(m_dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
 				}
 			}
 			else if(rc == LIBEVDEV_READ_STATUS_SUCCESS && ev.type != EV_SYN)
 			{
 				const struct input_absinfo* abs = nullptr;
-				if(ev.type == EV_ABS) abs = libevdev_get_abs_info(dev, ev.code);
-				OnInputEvent(device, ev.code, ev.value, ev.type, abs);
+				if(ev.type == EV_ABS) abs = libevdev_get_abs_info(m_dev, ev.code);
+				OnInputEvent(m_deviceId, ev.code, ev.value, ev.type, abs);
 			}
 		} while(rc != -EAGAIN && m_running);
 	}
-
-	libevdev_free(dev);
-	close(fd);
 }
