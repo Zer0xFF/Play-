@@ -54,6 +54,19 @@ void CGamePadDeviceManager::DisconnectInputEventCallback()
 	m_connectionlist.clear();
 }
 
+void CGamePadDeviceManager::SetVibration(GamePadDeviceId deviceId, uint8 largeMotor, uint8 smallMotor)
+{
+	auto itr = std::find_if(m_devicelist.begin(), m_devicelist.end(), [&](const auto& keyValuePair) {
+		return keyValuePair.second.uniq_id == deviceId;
+	});
+
+	if(itr != m_devicelist.end())
+	{
+		auto& GamePadInput = m_GPIEList[itr->first];
+		GamePadInput->SetVibration(largeMotor, smallMotor);
+	}
+}
+
 void CGamePadDeviceManager::UpdateDeviceList()
 {
 	auto path = fs::path("/dev/input/");

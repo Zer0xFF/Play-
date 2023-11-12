@@ -66,3 +66,8 @@ void CInputProviderEvDev::OnEvDevInputEvent(GamePadDeviceId deviceId, int code, 
 		OnInput(tgt, fixedValue);
 	}
 }
+
+void CInputProviderEvDev::SetVibration(DeviceIdType deviceId, uint8 largeMotor, uint8 smallMotor)
+{
+	m_GPDM.SetVibration(deviceId, largeMotor, smallMotor);
+}

@@ -34,6 +34,7 @@ public:
 	void UpdateOnInputEventCallback(OnInputEvent);
 	void DisconnectInputEventCallback();
 	static bool OpenDevice(const fs::path&, inputdev_pair&);
+	void SetVibration(GamePadDeviceId deviceId, uint8 largeMotor, uint8 smallMotor);
 
 private:
 	std::map<std::string, CGamePadDeviceManager::inputdevice> m_devicelist;

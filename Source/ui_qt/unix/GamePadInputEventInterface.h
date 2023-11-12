@@ -13,6 +13,7 @@ public:
 	CGamePadInputEventInterface(int fd, struct libevdev*, GamePadDeviceId deviceId);
 	virtual ~CGamePadInputEventInterface();
 
+	void SetVibration(uint8 largeMotor, uint8 smallMotor);
 	typedef Framework::CSignal<void(GamePadDeviceId, int, int, int, const input_absinfo*)> OnInputEventType;
 	OnInputEventType OnInputEvent;
 

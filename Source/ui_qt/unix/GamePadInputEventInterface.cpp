@@ -23,6 +23,29 @@ CGamePadInputEventInterface::~CGamePadInputEventInterface()
 	m_thread.join();
 }
 
+void CGamePadInputEventInterface::SetVibration(uint8 largeMotor, uint8 smallMotor)
+{
+	struct input_event play;
+	struct ff_effect effect;
+
+	memset(&effect, 0, sizeof(effect));
+	effect.type = FF_RUMBLE;
+	effect.u.rumble.strong_magnitude = largeMotor * 256;
+	effect.u.rumble.weak_magnitude = smallMotor * 65535;
+	effect.replay.length = 500;
+
+	ioctl(m_fd, EVIOCSFF, &effect);
+
+	memset(&play, 0, sizeof(play));
+	play.type = EV_FF;
+	play.code = effect.id;
+	play.value = 1;
+
+	write(m_fd, (const void*)&play, sizeof(play));
+
+	ioctl(m_fd, EVIOCRMFF, effect.id);
+}
+
 void CGamePadInputEventInterface::InputDeviceListenerThread()
 {
 	struct timespec ts;
