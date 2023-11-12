@@ -94,6 +94,11 @@ void CInputProviderMacOsHid::OnDeviceMatchedStub(void* context, IOReturn result,
 	reinterpret_cast<CInputProviderMacOsHid*>(context)->OnDeviceMatched(result, sender, device);
 }
 
+void CInputProviderMacOsHid::OnDeviceRemovedStub(void* context, IOReturn result, void* sender, IOHIDDeviceRef device)
+{
+	reinterpret_cast<CInputProviderMacOsHid*>(context)->OnDeviceRemoved(result, sender, device);
+}
+
 void CInputProviderMacOsHid::InputValueCallbackStub(void* context, IOReturn result, void* sender, IOHIDValueRef value)
 {
 	auto deviceInfo = reinterpret_cast<DEVICE_INFO*>(context);
@@ -134,6 +139,26 @@ void CInputProviderMacOsHid::OnDeviceMatched(IOReturn result, void* sender, IOHI
 		IOHIDDeviceRegisterInputValueCallback(device, &InputValueCallbackStub, &deviceInfo);
 	}
 	CreateForceFeedbackDevice(deviceInfo);
+}
+
+void CInputProviderMacOsHid::OnDeviceRemoved(IOReturn result, void* sender, IOHIDDeviceRef device)
+{
+	auto deviceId = GetDeviceID(device);
+	assert(!m_devices.find(deviceId));
+	auto& deviceInfo = m_devices[deviceId];
+
+	if(deviceInfo.ffEffect)
+	{
+		FFDeviceReleaseEffect(deviceInfo.ffDevice, deviceInfo.ffEffect);
+		deviceInfo.ffEffect = nullptr;
+	}
+
+	if(deviceInfo.ffDevice)
+	{
+		FFReleaseDevice(deviceInfo.ffDevice);
+		deviceInfo.ffDevice = nullptr;
+	}
+	m_devices.erase(deviceId);
 }
 
 void CInputProviderMacOsHid::InputValueCallback(DEVICE_INFO* deviceInfo, IOReturn result, void* sender, IOHIDValueRef valueRef)
@@ -351,6 +376,7 @@ void CInputProviderMacOsHid::InputDeviceListenerThread()
 	}
 
 	IOHIDManagerRegisterDeviceMatchingCallback(m_hidManager, OnDeviceMatchedStub, this);
+	IOHIDManagerRegisterDeviceRemovalCallback(m_hidManager, OnDeviceRemovedStub, this);
 
 	IOHIDManagerOpen(m_hidManager, kIOHIDOptionsTypeNone);
 	IOHIDManagerScheduleWithRunLoop(m_hidManager, CFRunLoopGetCurrent(), CFSTR("CustomLoop"));

@@ -111,11 +111,13 @@ private:
 	CFMutableDictionaryRef CreateDeviceMatchingDictionary(uint32 usagePage, uint32 usage);
 
 	static void OnDeviceMatchedStub(void* context, IOReturn result, void* sender, IOHIDDeviceRef device);
+	static void OnDeviceRemovedStub(void* context, IOReturn result, void* sender, IOHIDDeviceRef device);
 	static void InputValueCallbackStub(void* context, IOReturn result, void* sender, IOHIDValueRef valueRef);
 	static void InputReportCallbackStub_DS3(void* context, IOReturn result, void* sender, IOHIDReportType type, uint32_t reportID, uint8_t* report, CFIndex reportLength);
 	static void InputReportCallbackStub_DS4(void* context, IOReturn result, void* sender, IOHIDReportType type, uint32_t reportID, uint8_t* report, CFIndex reportLength);
 
 	void OnDeviceMatched(IOReturn result, void* sender, IOHIDDeviceRef device);
+	void OnDeviceRemoved(IOReturn result, void* sender, IOHIDDeviceRef device);
 	void InputValueCallback(DEVICE_INFO*, IOReturn result, void* sender, IOHIDValueRef value);
 	void InputReportCallback_DS3(DEVICE_INFO*, IOReturn result, void* sender, IOHIDReportType type, uint32_t reportID, uint8_t* report, CFIndex reportLength);
 	void InputReportCallback_DS4(DEVICE_INFO*, IOReturn result, void* sender, IOHIDReportType type, uint32_t reportID, uint8_t* report, CFIndex reportLength);
