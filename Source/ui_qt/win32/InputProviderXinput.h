@@ -16,6 +16,9 @@ public:
 	std::vector<DEVICEINFO> GetDevices() const override;
 	void SetVibration(DeviceIdType deviceId, uint8 largeMotor, uint8 smallMotor) override;
 
+	virtual bool InstanceAutoPadConfigure(int padIndex, DeviceIdType deviceId, CInputBindingManager* bindingManager) override;
+	void AutoPadConfigure(int padIndex, DeviceIdType deviceId, CInputBindingManager* bindingManager);
+
 private:
 	enum
 	{
@@ -63,6 +66,8 @@ private:
 	void UpdateDisconnectedDevice(uint32);
 	void ReportButton(uint32, KEYID, bool);
 	void ReportAxis(uint32, KEYID, int32);
+
+	static BINDINGTARGET MakeBindingTarget(DeviceIdType deviceId, int keyCode, BINDINGTARGET::KEYTYPE keyType);
 
 	bool m_pollingEnabled = true;
 	std::thread m_pollingThread;

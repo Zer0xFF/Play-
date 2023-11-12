@@ -10,6 +10,7 @@
 static const uint32 DeviceIdTypeCount = 6;
 typedef std::array<uint32, DeviceIdTypeCount> DeviceIdType;
 
+class CInputBindingManager;
 struct DEVICEINFO
 {
 	uint32 providerId = 0;
@@ -82,7 +83,9 @@ public:
 	{
 		return {};
 	};
+
 	virtual void SetVibration(DeviceIdType deviceId, uint8 largeMotor, uint8 smallMotor){};
+	virtual bool InstanceAutoPadConfigure(int padIndex, DeviceIdType deviceId, CInputBindingManager* bindingManager){ return false; };
 
 	using OnInputSignal = Framework::CSignal<void(const BINDINGTARGET&, uint32)>;
 	using OnInputSignalConnection = OnInputSignal::Connection;

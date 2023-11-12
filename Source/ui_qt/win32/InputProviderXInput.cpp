@@ -1,4 +1,5 @@
 #include "InputProviderXInput.h"
+#include "input/InputBindingManager.h"
 #include "string_format.h"
 
 constexpr uint32 PROVIDER_ID = 'xinp';
@@ -212,4 +213,58 @@ void CInputProviderXInput::ReportAxis(uint32 deviceIndex, KEYID keyId, int32 raw
 	tgt.keyId = keyId;
 	uint32 cvtValue = std::min<uint32>((rawValue + 0x8000) >> 8, BINDINGTARGET::AXIS_MAX);
 	OnInput(tgt, cvtValue);
+}
+
+bool CInputProviderXInput::InstanceAutoPadConfigure(int padIndex, DeviceIdType deviceId, CInputBindingManager* bindingManager)
+{
+	AutoPadConfigure(padIndex, deviceId, bindingManager);
+	return true;
+}
+
+BINDINGTARGET CInputProviderXInput::MakeBindingTarget(DeviceIdType deviceId, int keyCode, BINDINGTARGET::KEYTYPE keyType)
+{
+	return BINDINGTARGET(PROVIDER_ID, deviceId, keyCode, keyType);
+}
+
+void CInputProviderXInput::AutoPadConfigure(int padIndex, DeviceIdType deviceId, CInputBindingManager* bindingManager)
+{
+#define SBind(PS2BTN, XINPUT_BTN)                                                                                                                                                              \
+	{                                                                                                                                                                                     \
+			bindingManager->SetSimpleBinding(padIndex, PS2::CControllerInfo::PS2BTN, MakeBindingTarget(deviceId, KEYID::XINPUT_BTN, BINDINGTARGET::KEYTYPE::BUTTON)); \
+	}
+
+#define SAxisBind(PS2BTN, XINPUT_BTN)                                                                                                                                                        \
+	{                                                                                                                                                                                   \
+			bindingManager->SetSimpleBinding(padIndex, PS2::CControllerInfo::PS2BTN, MakeBindingTarget(deviceId, KEYID::XINPUT_BTN, BINDINGTARGET::KEYTYPE::AXIS)); \
+	}
+	SBind(START, KEYID_START);
+	SBind(SELECT, KEYID_BACK);
+
+	SBind(DPAD_UP, KEYID_DPAD_UP);
+	SBind(DPAD_RIGHT, KEYID_DPAD_RIGHT);
+	SBind(DPAD_DOWN, KEYID_DPAD_DOWN);
+	SBind(DPAD_LEFT, KEYID_DPAD_LEFT);
+
+	SBind(L1, KEYID_LSHOULDER);
+	SBind(L2, KEYID_LTRIGGER);
+	SBind(L3, KEYID_RTRIGGER);
+	SBind(R1, KEYID_RSHOULDER);
+	SBind(R2, KEYID_RTHUMB);
+	SBind(R3, KEYID_RTHUMB);
+
+	SBind(TRIANGLE, KEYID_Y);
+	SBind(CIRCLE, KEYID_B);
+	SBind(CROSS, KEYID_A);
+	SBind(SQUARE, KEYID_X);
+
+	SAxisBind(ANALOG_LEFT_X, KEYID_LTHUMB_X);
+	SAxisBind(ANALOG_LEFT_Y, KEYID_LTHUMB_Y);
+	SAxisBind(ANALOG_RIGHT_X, KEYID_RTHUMB_X);
+	SAxisBind(ANALOG_RIGHT_Y, KEYID_RTHUMB_Y);
+
+	auto targetBinding = MakeBindingTarget(deviceId, -1, BINDINGTARGET::KEYTYPE::MOTOR);
+	bindingManager->SetMotorBinding(padIndex, targetBinding);
+
+#undef SBind
+#undef SAxisBind
 }

@@ -26,6 +26,39 @@
    <string>Controller Manager</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
+   <item row="1" column="0" colspan="2">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Profile(s)</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QComboBox" name="comboBox"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="addProfileButton">
+        <property name="text">
+         <string>Add</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="delProfileButton">
+        <property name="text">
+         <string>Remove</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QPushButton" name="ConfigAllButton">
+     <property name="text">
+      <string>Config All</string>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="0" colspan="2">
     <widget class="QTabWidget" name="tabWidget">
      <property name="enabled">
@@ -167,14 +200,7 @@ QGroupBox::title {
      </widget>
     </widget>
    </item>
-   <item row="2" column="0">
-    <widget class="QPushButton" name="ConfigAllButton">
-     <property name="text">
-      <string>Config All</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="1">
+   <item row="3" column="1">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -187,26 +213,38 @@ QGroupBox::title {
      </property>
     </widget>
    </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="QGroupBox" name="groupBox">
-     <property name="title">
-      <string>Profile(s)</string>
+   <item row="2" column="0" colspan="2">
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="minimumSize">
+      <size>
+       <width>700</width>
+       <height>0</height>
+      </size>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <property name="title">
+      <string>Configure</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <widget class="QComboBox" name="comboBox"/>
-      </item>
-      <item>
-       <widget class="QPushButton" name="addProfileButton">
-        <property name="text">
-         <string>Add</string>
+       <widget class="QComboBox" name="deviceComboBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="delProfileButton">
+       <widget class="QPushButton" name="autoConfigButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
-         <string>Remove</string>
+         <string>Auto Configure</string>
         </property>
        </widget>
       </item>

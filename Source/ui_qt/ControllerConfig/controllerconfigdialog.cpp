@@ -88,6 +88,12 @@ ControllerConfigDialog::ControllerConfigDialog(CInputBindingManager* inputBindin
 		                 });
 	}
 	PrepareProfiles();
+
+	for(auto index = 0; index < m_devices.size(); ++index)
+	{
+		auto devInfo = m_devices[index];
+		ui->deviceComboBox->addItem(devInfo.name.c_str());
+	}
 }
 
 ControllerConfigDialog::~ControllerConfigDialog()
@@ -321,4 +327,13 @@ void ControllerConfigDialog::on_delProfileButton_clicked()
 			fs::remove(profile_path);
 		}
 	}
+}
+
+void ControllerConfigDialog::on_autoConfigButton_clicked()
+{
+	auto index = ui->deviceComboBox->currentIndex();
+	auto padIndex = ui->tabWidget->currentIndex();
+	auto devInfo = m_devices[index];
+	m_inputManager->AutoPadConfigure(padIndex, devInfo.providerId, devInfo.deviceId);
+	static_cast<CInputBindingModel*>(m_padUiElements[padIndex].bindingsView->model())->Refresh();
 }

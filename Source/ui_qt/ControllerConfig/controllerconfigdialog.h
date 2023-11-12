@@ -38,6 +38,7 @@ private slots:
 	void on_comboBox_currentIndexChanged(int index);
 	void on_addProfileButton_clicked();
 	void on_delProfileButton_clicked();
+	void on_autoConfigButton_clicked();
 
 private:
 	struct PadUiElements

@@ -141,6 +141,15 @@ CInputBindingManager::ProviderConnectionMap CInputBindingManager::OverrideInputE
 	return providersOverrideConnection;
 }
 
+void CInputBindingManager::AutoPadConfigure(int padIndex, uint32 providerId, DeviceIdType deviceId)
+{
+	auto itr = m_providers.find(providerId);
+	if(itr != m_providers.end())
+	{
+		itr->second->InstanceAutoPadConfigure(padIndex, deviceId, this);
+	}
+}
+
 std::string CInputBindingManager::GetTargetDescription(const BINDINGTARGET& target) const
 {
 	auto providerIterator = m_providers.find(target.providerId);
