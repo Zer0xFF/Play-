@@ -2,7 +2,7 @@
 #include "string_format.h"
 #include "string_cast.h"
 
-#define PROVIDER_ID 'dinp'
+constexpr uint32 PROVIDER_ID = 'dinp';
 
 static_assert(sizeof(GUID) <= sizeof(DeviceIdType::value_type) * DeviceIdTypeCount, "DeviceIdType cannot hold GUID");
 

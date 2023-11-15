@@ -3,7 +3,7 @@
 #include "InputProviderQtKey.h"
 #include "string_format.h"
 
-#define PROVIDER_ID 'QtKy'
+constexpr uint32 PROVIDER_ID = 'QtKy';
 
 uint32 CInputProviderQtKey::GetId() const
 {

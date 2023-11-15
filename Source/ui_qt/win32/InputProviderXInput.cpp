@@ -1,7 +1,7 @@
 #include "InputProviderXInput.h"
 #include "string_format.h"
 
-#define PROVIDER_ID 'xinp'
+constexpr uint32 PROVIDER_ID = 'xinp';
 
 // clang-format off
 const char* CInputProviderXInput::g_keyNames[CInputProviderXInput::KEYID_MAX] =

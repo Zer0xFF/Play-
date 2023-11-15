@@ -2,7 +2,7 @@
 #include "InputProviderQtMouse.h"
 #include "string_format.h"
 
-#define PROVIDER_ID 'QtMo'
+constexpr uint32 PROVIDER_ID = 'QtMo';
 
 uint32 CInputProviderQtMouse::GetId() const
 {

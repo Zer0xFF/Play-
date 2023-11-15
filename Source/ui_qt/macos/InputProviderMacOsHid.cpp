@@ -1,7 +1,7 @@
 #include "InputProviderMacOsHid.h"
 #include "string_format.h"
 
-#define PROVIDER_ID 'mHID'
+constexpr uint32 PROVIDER_ID = 'mHID';
 
 static int GetIntProperty(IOHIDDeviceRef device, CFStringRef key)
 {

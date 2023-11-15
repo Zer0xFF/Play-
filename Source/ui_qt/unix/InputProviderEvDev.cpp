@@ -2,7 +2,7 @@
 #include "InputProviderEvDev.h"
 #include "string_format.h"
 
-#define PROVIDER_ID 'evdv'
+constexpr uint32 PROVIDER_ID = 'evdv';
 
 CInputProviderEvDev::CInputProviderEvDev()
     : m_GPDL([this](auto a, auto b, auto c, auto d, auto e) { this->OnEvDevInputEvent(a, b, c, d, e); })
