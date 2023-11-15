@@ -90,7 +90,7 @@ public:
 
 	void RegisterInputProvider(const ProviderPtr&);
 	ProviderConnectionMap OverrideInputEventHandler(const InputEventFunction&);
-	void AutoPadConfigure(int padIndex, uint32 providerId, DeviceIdType deviceId);
+	bool AutoPadConfigure(int padIndex, uint32 providerId, DeviceIdType deviceId);
 
 	std::string GetTargetDescription(const BINDINGTARGET&) const;
 

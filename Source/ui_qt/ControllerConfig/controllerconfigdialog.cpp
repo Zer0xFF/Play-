@@ -334,6 +334,14 @@ void ControllerConfigDialog::on_autoConfigButton_clicked()
 	auto index = ui->deviceComboBox->currentIndex();
 	auto padIndex = ui->tabWidget->currentIndex();
 	auto devInfo = m_devices[index];
-	m_inputManager->AutoPadConfigure(padIndex, devInfo.providerId, devInfo.deviceId);
-	static_cast<CInputBindingModel*>(m_padUiElements[padIndex].bindingsView->model())->Refresh();
+	auto res = m_inputManager->AutoPadConfigure(padIndex, devInfo.providerId, devInfo.deviceId);
+	if(res)
+	{
+		static_cast<CInputBindingModel*>(m_padUiElements[padIndex].bindingsView->model())->Refresh();
+	}
+	else
+	{
+		auto message = QString("This device doesnt support auto configuration.");
+		QMessageBox::warning(this, "Warning", message);
+	}
 }
