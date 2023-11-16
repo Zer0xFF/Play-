@@ -94,6 +94,10 @@ ControllerConfigDialog::ControllerConfigDialog(CInputBindingManager* inputBindin
 		auto devInfo = m_devices[index];
 		ui->deviceComboBox->addItem(devInfo.name.c_str());
 	}
+
+#ifndef _WIN32
+	ui->autoConfigGroupBox->setVisible(false);
+#endif
 }
 
 ControllerConfigDialog::~ControllerConfigDialog()
